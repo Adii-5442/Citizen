@@ -17,7 +17,6 @@ import { useNavigation } from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import { RootStackParamList } from '../navigators/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import LinearGradient from 'react-native-linear-gradient';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -456,14 +455,9 @@ const HomeScreen = () => {
         onPress={() => navigation.navigate('PostRant')}
         activeOpacity={0.9}
       >
-        <LinearGradient
-          colors={theme.colors.gradient}
-          style={styles.fab}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        <View style={styles.fab}>
           <Text style={styles.fabIcon}>+</Text>
-        </LinearGradient>
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -569,6 +563,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: theme.colors.primary,
   },
   fabIcon: {
     color: theme.colors.background,
