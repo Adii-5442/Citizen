@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, PermissionsAndroid, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Geolocation from '@react-native-community/geolocation';
 import { colors, spacing, typography } from '../utils/theme';
 import RantCard from '../components/RantCard';
 import { RootStackParamList } from '../navigators/AppNavigator';
@@ -31,6 +32,68 @@ const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [sortBy, setSortBy] = useState<'recent' | 'trending'>('recent');
   const [rants, setRants] = useState(DUMMY_RANTS);
+  const [currentLocation, setCurrentLocation] = useState('Loading...');
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'Citizen needs access to your location to show local rants.',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+          );
+          const data = await response.json();
+          const city = data.address.city || data.address.town || data.address.village || 'Unknown Location';
+          setCurrentLocation(city);
+          setLocationError(null);
+        } catch (error) {
+          console.error('Error fetching location name:', error);
+          setLocationError('Error getting location name');
+        }
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setLocationError('Error getting location');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  };
+
+  useEffect(() => {
+    const initLocation = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (hasPermission) {
+        getCurrentLocation();
+      } else {
+        setLocationError('Location permission denied');
+      }
+    };
+
+    initLocation();
+  }, []);
 
   const handleUpvote = (rantId: string) => {
     setRants(prevRants =>
@@ -52,7 +115,15 @@ const HomeScreen = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Local Rants</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.title}>Citizen</Text>
+          <View style={styles.locationContainer}>
+            <Text style={styles.locationIcon}>📍</Text>
+            <Text style={styles.locationText}>
+              {locationError || currentLocation}
+            </Text>
+          </View>
+        </View>
 
         {/* Sort Tabs */}
         <View style={styles.sortContainer}>
@@ -123,9 +194,29 @@ const styles = StyleSheet.create({
     elevation: 4,
     zIndex: 10,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
   title: {
     ...typography.h1,
-    marginBottom: spacing.sm,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: 16,
+  },
+  locationIcon: {
+    marginRight: spacing.xs,
+  },
+  locationText: {
+    ...typography.caption,
+    color: colors.text,
   },
   sortContainer: {
     flexDirection: 'row',
