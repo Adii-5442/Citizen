@@ -24,7 +24,7 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 // Custom theme with beautiful color palette
 const theme = {
   colors: {
-    primary: '#6C5CE7',        // Vibrant Purple
+    primary: '#2E86AB',        // Vibrant Purple
     secondary: '#00CEC9',      // Turquoise
     accent: '#FD79A8',         // Pink
     background: '#FFFFFF',     // Pure White
@@ -34,7 +34,7 @@ const theme = {
     border: '#E6E6F0',         // Soft Lavender border
     location: '#dfe6e9',       // Light Blue Grey
     success: '#00B894',        // Green
-    gradient: ['#6C5CE7', '#8E5CE7'] // Purple gradient
+    gradient: ['#2E86AB', '#8E5CE7'] // Purple gradient
   },
   spacing: {
     xs: 4,
@@ -393,7 +393,11 @@ const HomeScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>Citizen</Text>
+          <Image 
+            source={require('../assets/logo-ss.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <TouchableOpacity style={styles.locationContainer} onPress={getCurrentLocation}>
             <Text style={styles.locationIcon}>📍</Text>
             <Text style={styles.locationText}>
@@ -471,10 +475,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 60,
-    paddingBottom: theme.spacing.md,
-    paddingHorizontal: theme.spacing.lg,
-    backgroundColor: theme.colors.background,
+    paddingTop: Platform.OS === 'ios' ? 20 : 30,
+    paddingBottom: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.md,
+    backgroundColor: '#2E86AB',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     shadowColor: '#000',
@@ -488,13 +492,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.xs,
+    height: 60,
   },
-  title: {
-    ...theme.typography.h1,
-    letterSpacing: 0.5,
-    color: theme.colors.primary,
-  } as TextStyle,
+  logo: {
+    width: 150,
+    height: 150,
+    marginLeft: -theme.spacing.xs,
+    resizeMode: 'contain',
+    borderRadius: 125, // Half of width/height
+    overflow: 'hidden',
+  } as ImageStyle,
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
