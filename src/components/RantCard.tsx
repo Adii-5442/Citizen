@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { colors, spacing, typography, shadows } from '../utils/theme';
 
 interface RantCardProps {
@@ -7,6 +7,7 @@ interface RantCardProps {
   city: string;
   upvotes: number;
   timeAgo: string;
+  imageUrl: string;
   onUpvote: () => void;
 }
 
@@ -15,10 +16,18 @@ const RantCard: React.FC<RantCardProps> = ({
   city,
   upvotes,
   timeAgo,
+  imageUrl,
   onUpvote,
 }) => {
   return (
     <View style={[styles.container, shadows.small]}>
+      {imageUrl && (
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      )}
       <Text style={styles.text}>{text}</Text>
       <View style={styles.footer}>
         <View style={styles.locationContainer}>
@@ -40,6 +49,12 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.md,
     marginHorizontal: spacing.md,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginBottom: spacing.md,
   },
   text: {
     ...typography.body,
