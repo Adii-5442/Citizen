@@ -1,9 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated } from 'react-native';
-import { RantCardProps } from '../types';
-import { colors, spacing, typography } from '../utils/theme';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Animated,
+} from 'react-native';
+import {RantCardProps} from '../types';
+import {colors, spacing, typography} from '../utils/theme';
 
-const RantCard = ({ text, city, upvotes, timeAgo, imageUrl, onUpvote }: RantCardProps) => {
+const RantCard = ({
+  text,
+  city,
+  upvotes,
+  timeAgo,
+  imageUrl,
+  onUpvote,
+}: RantCardProps) => {
   const [isUpvoted, setIsUpvoted] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
 
@@ -11,7 +25,7 @@ const RantCard = ({ text, city, upvotes, timeAgo, imageUrl, onUpvote }: RantCard
     if (!isUpvoted) {
       setIsUpvoted(true);
       onUpvote();
-      
+
       // Animation effect
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -37,36 +51,41 @@ const RantCard = ({ text, city, upvotes, timeAgo, imageUrl, onUpvote }: RantCard
           <Text style={rantStyles.timeText}>{timeAgo}</Text>
         </View>
       </View>
-      
+
       <Text style={rantStyles.rantText}>{text}</Text>
-      
+
       {imageUrl && (
         <Image
-          source={{ uri: imageUrl }}
+          source={{uri: imageUrl}}
           style={rantStyles.rantImage}
           resizeMode="cover"
         />
       )}
-      
+
       <View style={rantStyles.cardFooter}>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleUpvote}
           activeOpacity={0.7}
-          style={rantStyles.upvoteButton}
-        >
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <Text style={[
-              rantStyles.upvoteIcon, 
-              isUpvoted && rantStyles.upvotedIcon
-            ]}>▲</Text>
+          style={rantStyles.upvoteButton}>
+          <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+            <Text
+              style={[
+                rantStyles.upvoteIcon,
+                isUpvoted && rantStyles.upvotedIcon,
+              ]}>
+              ▲
+            </Text>
           </Animated.View>
-          <Text style={[
-            rantStyles.upvoteCount, 
-            isUpvoted && rantStyles.upvotedCount
-          ]}>{upvotes}</Text>
+          <Text
+            style={[
+              rantStyles.upvoteCount,
+              isUpvoted && rantStyles.upvotedCount,
+            ]}>
+            {upvotes}
+          </Text>
           <Text style={rantStyles.upvoteLabel}>upvotes</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={rantStyles.commentButton} activeOpacity={0.7}>
           <Text style={rantStyles.commentIcon}>💬</Text>
           <Text style={rantStyles.commentText}>Comment</Text>
@@ -83,7 +102,7 @@ const rantStyles = StyleSheet.create({
     marginBottom: spacing.md,
     padding: spacing.md,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: {width: 0, height: 6},
     shadowOpacity: 0.05,
     shadowRadius: 12,
     elevation: 4,
@@ -173,4 +192,4 @@ const rantStyles = StyleSheet.create({
   },
 });
 
-export default RantCard; 
+export default RantCard;
