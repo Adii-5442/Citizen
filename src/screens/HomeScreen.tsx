@@ -9,7 +9,6 @@ import {
   Platform,
   Image,
   StatusBar,
-  Animated,
   ImageStyle,
   TextStyle
 } from 'react-native';
@@ -17,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import { RootStackParamList } from '../navigators/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import RantCard from '../components/RantCard';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -79,187 +79,6 @@ const theme = {
     circle: 9999
   }
 };
-
-// Add type for RantCard props
-type RantCardProps = {
-  text: string;
-  city: string;
-  upvotes: number;
-  timeAgo: string;
-  imageUrl: string;
-  onUpvote: () => void;
-};
-
-// Modified RantCard component with enhanced design
-const RantCard = ({ text, city, upvotes, timeAgo, imageUrl, onUpvote }: RantCardProps) => {
-  const [isUpvoted, setIsUpvoted] = useState(false);
-  const scaleAnim = useState(new Animated.Value(1))[0];
-
-  const handleUpvote = () => {
-    if (!isUpvoted) {
-      setIsUpvoted(true);
-      onUpvote();
-      
-      // Animation effect
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  };
-
-  return (
-    <View style={rantStyles.cardContainer}>
-      <View style={rantStyles.cardHeader}>
-        <View style={rantStyles.locationContainer}>
-          <Text style={rantStyles.locationIcon}>📍</Text>
-          <Text style={rantStyles.cityText}>{city}</Text>
-          <Text style={rantStyles.timeText}>{timeAgo}</Text>
-        </View>
-      </View>
-      
-      <Text style={rantStyles.rantText}>{text}</Text>
-      
-      {imageUrl && (
-        <Image
-          source={{ uri: imageUrl }}
-          style={rantStyles.rantImage}
-          resizeMode="cover"
-        />
-      )}
-      
-      <View style={rantStyles.cardFooter}>
-        <TouchableOpacity 
-          onPress={handleUpvote}
-          activeOpacity={0.7}
-          style={rantStyles.upvoteButton}
-        >
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <Text style={[
-              rantStyles.upvoteIcon, 
-              isUpvoted && rantStyles.upvotedIcon
-            ]}>▲</Text>
-          </Animated.View>
-          <Text style={[
-            rantStyles.upvoteCount, 
-            isUpvoted && rantStyles.upvotedCount
-          ]}>{upvotes}</Text>
-          <Text style={rantStyles.upvoteLabel}>upvotes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={rantStyles.commentButton} activeOpacity={0.7}>
-          <Text style={rantStyles.commentIcon}>💬</Text>
-          <Text style={rantStyles.commentText}>Comment</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-const rantStyles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.md,
-    padding: theme.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.sm,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationIcon: {
-    width: 14,
-    height: 14,
-    marginRight: theme.spacing.xs,
-    tintColor: theme.colors.primary,
-  } as ImageStyle,
-  cityText: {
-    ...theme.typography.small,
-    fontWeight: '600',
-    marginRight: theme.spacing.xs,
-  },
-  timeText: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-    opacity: 0.7,
-  },
-  rantText: {
-    ...theme.typography.body,
-    marginBottom: theme.spacing.md,
-    lineHeight: 22,
-  },
-  rantImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: theme.borderRadius.sm,
-    marginBottom: theme.spacing.md,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: theme.spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  upvoteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.xs,
-  },
-  upvoteIcon: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginRight: 4,
-  },
-  upvotedIcon: {
-    color: theme.colors.primary,
-  },
-  upvoteCount: {
-    ...theme.typography.body,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  upvotedCount: {
-    color: theme.colors.primary,
-  },
-  upvoteLabel: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-  },
-  commentButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.xs,
-  },
-  commentIcon: {
-    fontSize: 16,
-    marginRight: 4,
-  },
-  commentText: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-  },
-});
 
 const DUMMY_RANTS = [
   {
