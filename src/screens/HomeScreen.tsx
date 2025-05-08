@@ -1,265 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  FlatList, 
-  TouchableOpacity, 
-  PermissionsAndroid, 
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  PermissionsAndroid,
   Platform,
   Image,
   StatusBar,
-  Animated,
   ImageStyle,
-  TextStyle
+  TextStyle,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
-import { RootStackParamList } from '../navigators/AppNavigator';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {RootStackParamList} from '../navigators/AppNavigator';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import RantCard from '../components/RantCard';
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Home'
+>;
 
 // Custom theme with beautiful color palette
 const theme = {
   colors: {
-    primary: '#2E86AB',        // Vibrant Purple
-    secondary: '#00CEC9',      // Turquoise
-    accent: '#FD79A8',         // Pink
-    background: '#FFFFFF',     // Pure White
-    card: '#F9F9FF',           // Light Lavender
-    textPrimary: '#2D3436',    // Dark Grey
-    textSecondary: '#636E72',  // Medium Grey
-    border: '#E6E6F0',         // Soft Lavender border
-    location: '#dfe6e9',       // Light Blue Grey
-    success: '#00B894',        // Green
-    gradient: ['#2E86AB', '#8E5CE7'] // Purple gradient
+    primary: '#2E86AB', // Vibrant Purple
+    secondary: '#00CEC9', // Turquoise
+    accent: '#FD79A8', // Pink
+    background: '#FFFFFF', // Pure White
+    card: '#F9F9FF', // Light Lavender
+    textPrimary: '#2D3436', // Dark Grey
+    textSecondary: '#636E72', // Medium Grey
+    border: '#E6E6F0', // Soft Lavender border
+    location: '#dfe6e9', // Light Blue Grey
+    success: '#00B894', // Green
+    gradient: ['#2E86AB', '#8E5CE7'], // Purple gradient
   },
   spacing: {
     xs: 4,
     sm: 8,
     md: 16,
     lg: 24,
-    xl: 32
+    xl: 32,
   },
   typography: {
     h1: {
       fontSize: 28,
       fontWeight: '700',
       fontFamily: 'Poppins-Bold',
-      color: '#2D3436'
+      color: '#2D3436',
     },
     h2: {
       fontSize: 22,
       fontWeight: '600',
       fontFamily: 'Poppins-SemiBold',
-      color: '#2D3436'
+      color: '#2D3436',
     },
     body: {
       fontSize: 16,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72'
+      color: '#636E72',
     },
     caption: {
       fontSize: 14,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72'
+      color: '#636E72',
     },
     small: {
       fontSize: 12,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72'
-    }
+      color: '#636E72',
+    },
   },
   borderRadius: {
     sm: 8,
     md: 16,
     lg: 24,
     xl: 32,
-    circle: 9999
-  }
+    circle: 9999,
+  },
 };
-
-// Add type for RantCard props
-type RantCardProps = {
-  text: string;
-  city: string;
-  upvotes: number;
-  timeAgo: string;
-  imageUrl: string;
-  onUpvote: () => void;
-};
-
-// Modified RantCard component with enhanced design
-const RantCard = ({ text, city, upvotes, timeAgo, imageUrl, onUpvote }: RantCardProps) => {
-  const [isUpvoted, setIsUpvoted] = useState(false);
-  const scaleAnim = useState(new Animated.Value(1))[0];
-
-  const handleUpvote = () => {
-    if (!isUpvoted) {
-      setIsUpvoted(true);
-      onUpvote();
-      
-      // Animation effect
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  };
-
-  return (
-    <View style={rantStyles.cardContainer}>
-      <View style={rantStyles.cardHeader}>
-        <View style={rantStyles.locationContainer}>
-          <Text style={rantStyles.locationIcon}>📍</Text>
-          <Text style={rantStyles.cityText}>{city}</Text>
-          <Text style={rantStyles.timeText}>{timeAgo}</Text>
-        </View>
-      </View>
-      
-      <Text style={rantStyles.rantText}>{text}</Text>
-      
-      {imageUrl && (
-        <Image
-          source={{ uri: imageUrl }}
-          style={rantStyles.rantImage}
-          resizeMode="cover"
-        />
-      )}
-      
-      <View style={rantStyles.cardFooter}>
-        <TouchableOpacity 
-          onPress={handleUpvote}
-          activeOpacity={0.7}
-          style={rantStyles.upvoteButton}
-        >
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-            <Text style={[
-              rantStyles.upvoteIcon, 
-              isUpvoted && rantStyles.upvotedIcon
-            ]}>▲</Text>
-          </Animated.View>
-          <Text style={[
-            rantStyles.upvoteCount, 
-            isUpvoted && rantStyles.upvotedCount
-          ]}>{upvotes}</Text>
-          <Text style={rantStyles.upvoteLabel}>upvotes</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={rantStyles.commentButton} activeOpacity={0.7}>
-          <Text style={rantStyles.commentIcon}>💬</Text>
-          <Text style={rantStyles.commentText}>Comment</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-const rantStyles = StyleSheet.create({
-  cardContainer: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.md,
-    padding: theme.spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.sm,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationIcon: {
-    width: 14,
-    height: 14,
-    marginRight: theme.spacing.xs,
-    tintColor: theme.colors.primary,
-  } as ImageStyle,
-  cityText: {
-    ...theme.typography.small,
-    fontWeight: '600',
-    marginRight: theme.spacing.xs,
-  },
-  timeText: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-    opacity: 0.7,
-  },
-  rantText: {
-    ...theme.typography.body,
-    marginBottom: theme.spacing.md,
-    lineHeight: 22,
-  },
-  rantImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: theme.borderRadius.sm,
-    marginBottom: theme.spacing.md,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: theme.spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  upvoteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: theme.spacing.xs,
-  },
-  upvoteIcon: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    marginRight: 4,
-  },
-  upvotedIcon: {
-    color: theme.colors.primary,
-  },
-  upvoteCount: {
-    ...theme.typography.body,
-    fontWeight: '600',
-    marginRight: 4,
-  },
-  upvotedCount: {
-    color: theme.colors.primary,
-  },
-  upvoteLabel: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-  },
-  commentButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.xs,
-  },
-  commentIcon: {
-    fontSize: 16,
-    marginRight: 4,
-  },
-  commentText: {
-    ...theme.typography.small,
-    color: theme.colors.textSecondary,
-  },
-});
 
 const DUMMY_RANTS = [
   {
@@ -303,7 +125,8 @@ const HomeScreen = () => {
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
             title: 'Location Permission',
-            message: 'Citizen needs access to your location to show local rants.',
+            message:
+              'Citizen needs access to your location to show local rants.',
             buttonNeutral: 'Ask Me Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'OK',
@@ -320,14 +143,18 @@ const HomeScreen = () => {
 
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+      async position => {
+        const {latitude, longitude} = position.coords;
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
           );
           const data = await response.json();
-          const city = data.address.city || data.address.town || data.address.village || 'Unknown Location';
+          const city =
+            data.address.city ||
+            data.address.town ||
+            data.address.village ||
+            'Unknown Location';
           setCurrentLocation(city);
           setLocationError(null);
         } catch (error) {
@@ -335,11 +162,11 @@ const HomeScreen = () => {
           setLocationError('Error getting location name');
         }
       },
-      (error) => {
+      error => {
         console.error('Error getting location:', error);
         setLocationError('Error getting location');
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
   };
 
@@ -364,8 +191,8 @@ const HomeScreen = () => {
   const handleUpvote = (rantId: string) => {
     setRants(prevRants =>
       prevRants.map(rant =>
-        rant.id === rantId ? { ...rant, upvotes: rant.upvotes + 1 } : rant
-      )
+        rant.id === rantId ? {...rant, upvotes: rant.upvotes + 1} : rant,
+      ),
     );
   };
 
@@ -387,17 +214,23 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Image 
+          <Image
             source={require('../assets/logo-ss.png')}
             style={styles.logo}
             resizeMode="contain"
           />
-          <TouchableOpacity style={styles.locationContainer} onPress={getCurrentLocation}>
+          <TouchableOpacity
+            style={styles.locationContainer}
+            onPress={getCurrentLocation}>
             <Text style={styles.locationIcon}>📍</Text>
             <Text style={styles.locationText}>
               {locationError || currentLocation}
@@ -410,18 +243,27 @@ const HomeScreen = () => {
           <View style={styles.sortTabs}>
             <TouchableOpacity
               style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
-              onPress={() => setSortBy('recent')}
-            >
-              <Text style={[styles.sortTabText, sortBy === 'recent' && styles.activeTabText]}>
+              onPress={() => setSortBy('recent')}>
+              <Text
+                style={[
+                  styles.sortTabText,
+                  sortBy === 'recent' && styles.activeTabText,
+                ]}>
                 Recent
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
-              style={[styles.sortTab, sortBy === 'trending' && styles.activeTab]}
-              onPress={() => setSortBy('trending')}
-            >
-              <Text style={[styles.sortTabText, sortBy === 'trending' && styles.activeTabText]}>
+              style={[
+                styles.sortTab,
+                sortBy === 'trending' && styles.activeTab,
+              ]}
+              onPress={() => setSortBy('trending')}>
+              <Text
+                style={[
+                  styles.sortTabText,
+                  sortBy === 'trending' && styles.activeTabText,
+                ]}>
                 Trending
               </Text>
             </TouchableOpacity>
@@ -433,7 +275,7 @@ const HomeScreen = () => {
       <FlatList
         data={sortedRants}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
+        renderItem={({item}) => (
           <RantCard
             text={item.text}
             city={item.city}
@@ -453,8 +295,7 @@ const HomeScreen = () => {
       <TouchableOpacity
         style={styles.fabContainer}
         onPress={() => navigation.navigate('PostRant')}
-        activeOpacity={0.9}
-      >
+        activeOpacity={0.9}>
         <View style={styles.fab}>
           <Text style={styles.fabIcon}>+</Text>
         </View>
@@ -476,7 +317,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 8,
@@ -552,7 +393,7 @@ const styles = StyleSheet.create({
     right: theme.spacing.lg,
     bottom: theme.spacing.xl,
     shadowColor: theme.colors.primary,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: {width: 0, height: 8},
     shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 8,

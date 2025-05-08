@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 // Import screens (we'll create these next)
 import HomeScreen from '../screens/HomeScreen';
@@ -16,7 +16,7 @@ export type RootStackParamList = {
   Home: undefined;
   PostRant: undefined;
   Profile: undefined;
-  PetitionGenerated: { rantId: string };
+  PetitionGenerated: {rantId: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -28,17 +28,20 @@ const AppNavigator = () => {
         initialRouteName="Splash"
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#FFFFFF' },
+          contentStyle: {backgroundColor: '#FFFFFF'},
         }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="PostRant" component={PostRantScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="PetitionGenerated" component={PetitionGeneratedScreen} />
+        <Stack.Screen
+          name="PetitionGenerated"
+          component={PetitionGeneratedScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-export default AppNavigator; 
+export default AppNavigator;
