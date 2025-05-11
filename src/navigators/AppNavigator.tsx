@@ -2,7 +2,8 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, Text, StyleSheet, Platform} from 'react-native';
+import {View, StyleSheet, Platform} from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors} from '../utils/theme';
 
 // Import screens
@@ -53,8 +54,8 @@ const MainTabs = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🏠</Text>
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcons name="home" size={size} color={color} />
           ),
         }}
       />
@@ -62,8 +63,8 @@ const MainTabs = () => {
         name="Search"
         component={SearchScreen}
         options={{
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🔍</Text>
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcons name="search" size={size} color={color} />
           ),
         }}
       />
@@ -71,9 +72,9 @@ const MainTabs = () => {
         name="PostRant"
         component={PostRantScreen}
         options={{
-          tabBarIcon: ({color}) => (
+          tabBarIcon: () => (
             <View style={styles.centerButton}>
-              <Text style={[styles.centerButtonText, {color}]}>+</Text>
+              <MaterialIcons name="add" size={32} color={colors.background} />
             </View>
           ),
           tabBarLabel: () => null,
@@ -83,8 +84,8 @@ const MainTabs = () => {
         name="Activity"
         component={ActivityScreen}
         options={{
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🔔</Text>
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcons name="notifications" size={size} color={color} />
           ),
         }}
       />
@@ -92,8 +93,8 @@ const MainTabs = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>👤</Text>
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcons name="person" size={size} color={color} />
           ),
         }}
       />
@@ -124,9 +125,6 @@ const AppNavigator = () => {
 };
 
 const styles = StyleSheet.create({
-  tabIcon: {
-    fontSize: 24,
-  },
   centerButton: {
     width: 56,
     height: 56,
@@ -143,11 +141,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-  },
-  centerButtonText: {
-    fontSize: 32,
-    color: colors.background,
-    fontWeight: 'bold',
   },
 });
 
