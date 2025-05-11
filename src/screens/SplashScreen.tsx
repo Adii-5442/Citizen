@@ -2,13 +2,17 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, typography } from '../utils/theme';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigators/AppNavigator';
+
+type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
 const SplashScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<SplashScreenNavigationProp>();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.navigate('Home');
+      navigation.navigate('MainTabs');
     }, 2000);
 
     return () => clearTimeout(timer);
