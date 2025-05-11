@@ -93,6 +93,7 @@ const MainTabs = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
+          headerShown:false,
           tabBarIcon: ({color, size}) => (
             <MaterialIcons name="person" size={size} color={color} />
           ),
