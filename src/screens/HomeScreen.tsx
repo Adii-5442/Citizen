@@ -11,32 +11,38 @@ import {
   StatusBar,
   ImageStyle,
   TextStyle,
+  Dimensions,
+  Animated,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import {RootStackParamList} from '../navigators/AppNavigator';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import RantCard from '../components/RantCard';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Home'
 >;
 
-// Custom theme with beautiful color palette
+// Modern theme with a fresh color palette
 const theme = {
   colors: {
-    primary: '#2E86AB', // Vibrant Purple
-    secondary: '#00CEC9', // Turquoise
-    accent: '#FD79A8', // Pink
-    background: '#FFFFFF', // Pure White
-    card: '#F9F9FF', // Light Lavender
-    textPrimary: '#2D3436', // Dark Grey
-    textSecondary: '#636E72', // Medium Grey
-    border: '#E6E6F0', // Soft Lavender border
-    location: '#dfe6e9', // Light Blue Grey
-    success: '#00B894', // Green
-    gradient: ['#2E86AB', '#8E5CE7'], // Purple gradient
+    primary: '#2563EB', // Modern Blue
+    secondary: '#3B82F6', // Light Blue
+    accent: '#60A5FA', // Sky Blue
+    background: '#F8FAFC', // Light Gray Background
+    card: '#FFFFFF', // White
+    textPrimary: '#1E293B', // Dark Slate
+    textSecondary: '#64748B', // Slate
+    border: '#E2E8F0', // Light Gray
+    location: '#EFF6FF', // Blue Gray
+    success: '#10B981', // Emerald
+    gradient: ['#2563EB', '#3B82F6'], // Blue gradient
+    danger: '#EF4444', // Red
+    warning: '#F59E0B', // Amber
   },
   spacing: {
     xs: 4,
@@ -47,31 +53,31 @@ const theme = {
   },
   typography: {
     h1: {
-      fontSize: 28,
+      fontSize: 32,
       fontWeight: '700',
       fontFamily: 'Poppins-Bold',
-      color: '#2D3436',
+      color: '#1E293B',
     },
     h2: {
-      fontSize: 22,
+      fontSize: 24,
       fontWeight: '600',
       fontFamily: 'Poppins-SemiBold',
-      color: '#2D3436',
+      color: '#1E293B',
     },
     body: {
       fontSize: 16,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72',
+      color: '#64748B',
     },
     caption: {
       fontSize: 14,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72',
+      color: '#64748B',
     },
     small: {
       fontSize: 12,
       fontFamily: 'Poppins-Regular',
-      color: '#636E72',
+      color: '#64748B',
     },
   },
   borderRadius: {
@@ -117,6 +123,7 @@ const HomeScreen = () => {
   const [currentLocation, setCurrentLocation] = useState('Loading...');
   const [locationError, setLocationError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const scrollY = new Animated.Value(0);
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -181,7 +188,7 @@ const HomeScreen = () => {
     };
 
     initLocation();
-    StatusBar.setBarStyle('dark-content');
+    StatusBar.setBarStyle('light-content');
     if (Platform.OS === 'android') {
       StatusBar.setBackgroundColor('transparent');
       StatusBar.setTranslucent(true);
@@ -212,67 +219,103 @@ const HomeScreen = () => {
     }
   });
 
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [160, 100],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0.9],
+    extrapolate: 'clamp',
+  });
+
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="dark-content"
+        barStyle="light-content"
         backgroundColor="transparent"
         translucent
       />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Image
-            source={require('../assets/logo-ss.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <TouchableOpacity
-            style={styles.locationContainer}
-            onPress={getCurrentLocation}>
-            <Text style={styles.locationIcon}>📍</Text>
-            <Text style={styles.locationText}>
-              {locationError || currentLocation}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Sort Tabs */}
-        <View style={styles.sortTabsContainer}>
-          <View style={styles.sortTabs}>
+      {/* Animated Header */}
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            height: headerHeight,
+            opacity: headerOpacity,
+          },
+        ]}>
+        <LinearGradient
+          colors={theme.colors.gradient}
+          style={styles.headerGradient}>
+          <View style={styles.headerContent}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={require('../assets/logo-ss.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+              <Text style={styles.appName}>Citizen</Text>
+            </View>
             <TouchableOpacity
-              style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
-              onPress={() => setSortBy('recent')}>
-              <Text
-                style={[
-                  styles.sortTabText,
-                  sortBy === 'recent' && styles.activeTabText,
-                ]}>
-                Recent
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.sortTab,
-                sortBy === 'trending' && styles.activeTab,
-              ]}
-              onPress={() => setSortBy('trending')}>
-              <Text
-                style={[
-                  styles.sortTabText,
-                  sortBy === 'trending' && styles.activeTabText,
-                ]}>
-                Trending
+              style={styles.locationContainer}
+              onPress={getCurrentLocation}>
+              <Icon name="map-marker" size={20} color={theme.colors.primary} />
+              <Text style={styles.locationText}>
+                {locationError || currentLocation}
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+
+          {/* Sort Tabs */}
+          <View style={styles.sortTabsContainer}>
+            <View style={styles.sortTabs}>
+              <TouchableOpacity
+                style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
+                onPress={() => setSortBy('recent')}>
+                <Icon
+                  name="clock-outline"
+                  size={20}
+                  color={sortBy === 'recent' ? '#fff' : theme.colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.sortTabText,
+                    sortBy === 'recent' && styles.activeTabText,
+                  ]}>
+                  Recent
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.sortTab,
+                  sortBy === 'trending' && styles.activeTab,
+                ]}
+                onPress={() => setSortBy('trending')}>
+                <Icon
+                  name="trending-up"
+                  size={20}
+                  color={sortBy === 'trending' ? '#fff' : theme.colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.sortTabText,
+                    sortBy === 'trending' && styles.activeTabText,
+                  ]}>
+                  Trending
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </LinearGradient>
+      </Animated.View>
 
       {/* Rants List */}
-      <FlatList
+      <Animated.FlatList
         data={sortedRants}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
@@ -289,17 +332,12 @@ const HomeScreen = () => {
         showsVerticalScrollIndicator={false}
         refreshing={refreshing}
         onRefresh={handleRefresh}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}
+        scrollEventThrottle={16}
       />
-
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fabContainer}
-        onPress={() => navigation.navigate('PostRant')}
-        activeOpacity={0.9}>
-        <View style={styles.fab}>
-          <Text style={styles.fabIcon}>+</Text>
-        </View>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -310,107 +348,107 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 20 : 30,
-    paddingBottom: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.md,
-    backgroundColor: '#2E86AB',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: 10,
+    overflow: 'hidden',
+  },
+  headerGradient: {
+    flex: 1,
+    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: 0,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-    height: 60,
+    marginBottom: theme.spacing.md,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginLeft: -theme.spacing.xs,
-    resizeMode: 'contain',
-    borderRadius: 125, // Half of width/height
-    overflow: 'hidden',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   } as ImageStyle,
+  appName: {
+    ...theme.typography.h1,
+    color: '#fff',
+    marginLeft: theme.spacing.sm,
+    fontSize: 24,
+  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.location,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.lg,
   },
-  locationIcon: {
-    marginRight: theme.spacing.xs,
-    fontSize: 16,
-  } as TextStyle,
   locationText: {
     ...theme.typography.caption,
-    color: theme.colors.textSecondary,
-    fontWeight: '500',
-    maxWidth: 120,
+    color: theme.colors.primary,
+    fontWeight: '600',
+    marginLeft: theme.spacing.xs,
   },
   sortTabsContainer: {
     alignItems: 'center',
+    marginTop: 0,
   },
   sortTabs: {
     flexDirection: 'row',
-    backgroundColor: theme.colors.location,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: theme.borderRadius.lg,
     padding: 4,
     width: '70%',
   },
   sortTab: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
+    gap: theme.spacing.xs,
   },
   activeTab: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   sortTabText: {
     ...theme.typography.caption,
     fontWeight: '600',
-    color: theme.colors.textSecondary,
+    color: '#fff',
   },
   activeTabText: {
-    color: theme.colors.background,
+    color: '#fff',
   },
   listContent: {
+    paddingTop: 220, // Account for header height
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: 100, // Make room for FAB
+    paddingBottom: theme.spacing.xl,
   },
-  fabContainer: {
+  postButton: {
     position: 'absolute',
     right: theme.spacing.lg,
-    bottom: theme.spacing.xl,
-    shadowColor: theme.colors.primary,
-    shadowOffset: {width: 0, height: 8},
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    top: Platform.OS === 'ios' ? 50 : 40,
+    zIndex: 20,
   },
-  fab: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  postButtonGradient: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.colors.primary,
-  },
-  fabIcon: {
-    color: theme.colors.background,
-    fontSize: 32,
-    fontWeight: '300',
-    marginBottom: 2,
+    shadowColor: theme.colors.primary,
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
 
