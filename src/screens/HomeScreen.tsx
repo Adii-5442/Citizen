@@ -93,24 +93,24 @@ const DUMMY_RANTS = [
   {
     id: '1',
     text: 'The potholes on Main Street are getting worse every day! The city needs to address this issue before someone gets hurt or damages their vehicle.',
-    url: 'https://assets.dnainfo.com/generated/photo/2014/09/3-1411740404.jpg/extralarge.jpg',
-    city: 'New York',
+    url: 'https://en-media.thebetterindia.com/uploads/2018/07/1-18.jpg',
+    city: 'Telibagh, Lucknow',
     upvotes: 15,
     timeAgo: '2h ago',
   },
   {
     id: '2',
     text: 'Why is the recycling collection always late in our neighborhood? This is the third week in a row that pickup has been delayed by at least a day.',
-    url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_Necw8YXxy8MjohW8Ayr3cl3r3yxvbhZAIivUbgcVTR7HVjuoLtk9Dj7aVEbwMQSD63o&usqp=CAU',
-    city: 'Los Angeles',
+    url: 'https://thumbs.dreamstime.com/b/indian-rag-pickers-search-recyclable-material-garbage-collection-center-march-hyderabad-india-68655292.jpg',
+    city: 'Amausi, Lucknow',
     upvotes: 8,
     timeAgo: '5h ago',
   },
   {
     id: '3',
     text: 'The new park beautification project has been abandoned halfway through. Now we have half a nice park and half an eyesore!',
-    url: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGFya3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60',
-    city: 'Chicago',
+    url: 'https://images.indianexpress.com/2022/10/Mumbai_swachh_1200.jpg',
+    city: 'Navi Mumbai',
     upvotes: 23,
     timeAgo: '1d ago',
   },
@@ -428,8 +428,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   listContent: {
-    paddingTop: 220, // Account for header height
-    paddingHorizontal: theme.spacing.lg,
+    paddingTop: 180,
     paddingBottom: theme.spacing.xl,
   },
   postButton: {

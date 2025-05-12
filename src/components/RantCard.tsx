@@ -47,135 +47,151 @@ const RantCard = ({
   };
 
   return (
-    <View style={rantStyles.container}>
-      {/* Left Side - Upvote Section */}
-      <View style={rantStyles.upvoteSection}>
-        <TouchableOpacity
-          onPress={handleUpvote}
-          activeOpacity={0.7}
-          style={rantStyles.upvoteButton}>
-          <Animated.View style={{transform: [{scale: scaleAnim}]}}>
-            <MaterialIcons
-              name={isUpvoted ? 'arrow-upward' : 'arrow-upward'}
-              size={24}
-              color={isUpvoted ? colors.primary : colors.textLight}
-            />
-          </Animated.View>
-          <Text
-            style={[
-              rantStyles.upvoteCount,
-              isUpvoted && rantStyles.upvotedCount,
-            ]}>
-            {upvotes}
-          </Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Newspaper Header */}
+      <View style={styles.header}>
+        <Text style={styles.newspaperTitle}>THE DAILY RANT</Text>
+        <View style={styles.headerInfo}>
+          <Text style={styles.headerText}>VOL. XCIII NO. 311</Text>
+          <Text style={styles.headerText}>{timeAgo.toUpperCase()}</Text>
+          <Text style={styles.headerText}>FIVE CENTS</Text>
+        </View>
       </View>
 
-      {/* Right Side - Content Section */}
-      <View style={rantStyles.contentSection}>
-        {/* Header */}
-        <View style={rantStyles.header}>
-          <View style={rantStyles.locationContainer}>
-            <MaterialIcons name="location-on" size={16} color={colors.primary} />
-            <Text style={rantStyles.cityText}>{city}</Text>
+      {/* Article Content */}
+      <View style={styles.content}>
+        {/* Location and Time */}
+        <View style={styles.metaInfo}>
+          <View style={styles.locationContainer}>
+            <MaterialIcons name="location-on" size={14} color={colors.text} />
+            <Text style={styles.locationText}>{city}</Text>
           </View>
-          <View style={rantStyles.timeContainer}>
-            <MaterialIcons name="access-time" size={14} color={colors.textLight} />
-            <Text style={rantStyles.timeText}>{timeAgo}</Text>
+          <View style={styles.timeContainer}>
+            <MaterialIcons name="access-time" size={14} color={colors.text} />
+            <Text style={styles.timeText}>{timeAgo}</Text>
           </View>
         </View>
 
-        {/* Content */}
-        <View style={rantStyles.content}>
-          <Text style={rantStyles.rantText} numberOfLines={3}>
-            {text}
-          </Text>
+        {/* Headline */}
+        <Text style={styles.headline} numberOfLines={2}>
+          {text.split(' ').slice(0, 8).join(' ')}...
+        </Text>
+
+        {/* Article Text */}
+        <View style={styles.articleContainer}>
+          <View style={styles.column}>
+            <Text style={styles.articleText}>
+              {text}
+            </Text>
+          </View>
+
+          {/* Image Section */}
           {imageUrl && (
-            <View style={rantStyles.imageWrapper}>
-              <Image
-                source={{uri: imageUrl}}
-                style={rantStyles.rantImage}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.3)']}
-                style={rantStyles.imageGradient}
-              />
+            <View style={styles.imageSection}>
+              <View style={styles.imageContainer}>
+                <Image
+                  source={{uri: imageUrl}}
+                  style={styles.articleImage}
+                  resizeMode="cover"
+                />
+                <Text style={styles.imageCaption}>
+                  {city} - Local residents share their concerns
+                </Text>
+              </View>
             </View>
           )}
         </View>
 
         {/* Footer Actions */}
-        <View style={rantStyles.footer}>
-          <TouchableOpacity style={rantStyles.actionButton}>
-            <MaterialIcons name="chat-bubble-outline" size={20} color={colors.textLight} />
-            <Text style={rantStyles.actionText}>Comment</Text>
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={handleUpvote}
+            style={styles.upvoteButton}>
+            <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+              <MaterialIcons
+                name="arrow-upward"
+                size={20}
+                color={isUpvoted ? colors.primary : colors.text}
+              />
+            </Animated.View>
+            <Text style={[styles.upvoteText, isUpvoted && styles.upvotedText]}>
+              {upvotes} Upvotes
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={rantStyles.actionButton}>
-            <MaterialIcons name="share" size={20} color={colors.textLight} />
-            <Text style={rantStyles.actionText}>Share</Text>
-          </TouchableOpacity>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity style={styles.actionButton}>
+              <MaterialIcons name="chat-bubble-outline" size={20} color={colors.text} />
+              <Text style={styles.actionText}>Comments</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={rantStyles.moreButton}>
-            <MaterialIcons name="more-horiz" size={24} color={colors.textLight} />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton}>
+              <MaterialIcons name="share" size={20} color={colors.text} />
+              <Text style={styles.actionText}>Share</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>
   );
 };
 
-const rantStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    marginBottom: spacing.lg,
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginHorizontal: spacing.md,
-  },
-  upvoteSection: {
-    width: 60,
-    backgroundColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  upvoteButton: {
-    alignItems: 'center',
-  },
-  upvoteCount: {
-    ...typography.body,
-    fontWeight: '600',
-    marginTop: spacing.xs,
-    color: colors.text,
-  },
-  upvotedCount: {
-    color: colors.primary,
-  },
-  contentSection: {
-    flex: 1,
-    padding: spacing.md,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+    marginHorizontal: 10,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    width: Dimensions.get('window').width - 20,
   },
   header: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 2,
+    borderBottomColor: '#000',
+    padding: spacing.md,
+  },
+  newspaperTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    letterSpacing: 2,
+    marginBottom: spacing.sm,
+    fontFamily: 'serif',
+  },
+  headerInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#000',
+    paddingTop: spacing.xs,
+  },
+  headerText: {
+    fontSize: 10,
+    color: colors.text,
+  },
+  content: {
+    padding: spacing.md,
+  },
+  metaInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.border,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 12,
   },
-  cityText: {
-    ...typography.caption,
+  locationText: {
+    fontSize: 12,
     fontWeight: '600',
-    marginLeft: spacing.xs,
+    marginLeft: 4,
     color: colors.text,
   },
   timeContainer: {
@@ -183,56 +199,80 @@ const rantStyles = StyleSheet.create({
     alignItems: 'center',
   },
   timeText: {
-    ...typography.caption,
-    color: colors.textLight,
-    marginLeft: 2,
+    fontSize: 12,
+    marginLeft: 4,
+    color: colors.text,
   },
-  content: {
+  headline: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: spacing.md,
+    fontFamily: 'serif',
+    color: colors.text,
+  },
+  articleContainer: {
+    flexDirection: 'row',
+  },
+  column: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  articleText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.text,
+    textAlign: 'justify',
+  },
+  imageSection: {
+    flex: 1,
+  },
+  imageContainer: {
     marginBottom: spacing.sm,
   },
-  rantText: {
-    ...typography.body,
-    lineHeight: 22,
-    color: colors.text,
-    marginBottom: spacing.md,
-  },
-  imageWrapper: {
-    position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  rantImage: {
+  articleImage: {
     width: '100%',
-    height: 180,
-    borderRadius: 12,
+    height: 200,
+    marginBottom: spacing.xs,
   },
-  imageGradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
+  imageCaption: {
+    fontSize: 10,
+    fontStyle: 'italic',
+    color: colors.text,
   },
   footer: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.md,
     paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: '#E5E5E5',
+  },
+  upvoteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  upvoteText: {
+    fontSize: 12,
+    marginLeft: 4,
+    color: colors.text,
+  },
+  upvotedText: {
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: spacing.md,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.xs,
   },
   actionText: {
-    ...typography.caption,
-    color: colors.textLight,
-    marginLeft: spacing.xs,
-  },
-  moreButton: {
-    padding: spacing.xs,
+    fontSize: 12,
+    marginLeft: 4,
+    color: colors.text,
   },
 });
 
