@@ -15,10 +15,14 @@ import ProfileScreen from '../screens/ProfileScreen';
 import PetitionGeneratedScreen from '../screens/PetitionGeneratedScreen';
 import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
+  Login: undefined;
+  Register: undefined;
   MainTabs: undefined;
   PostRant: undefined;
   PetitionGenerated: {rantId: string};
@@ -114,6 +118,8 @@ const AppNavigator = () => {
         }}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="MainTabs" component={MainTabs} />
         <Stack.Screen name="PostRant" component={PostRantScreen} />
         <Stack.Screen

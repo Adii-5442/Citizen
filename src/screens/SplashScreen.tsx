@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors, typography } from '../utils/theme';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/AppNavigator';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -11,11 +12,34 @@ const SplashScreen = () => {
   const navigation = useNavigation<SplashScreenNavigationProp>();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.navigate('MainTabs');
-    }, 2000);
+    const checkAuth = async () => {
+      try {
+        // In a real app, you'd verify a token with your backend
+        const userToken = await AsyncStorage.getItem('userToken');
 
-    return () => clearTimeout(timer);
+        // Check if onboarding has been completed
+        const hasOnboarded = await AsyncStorage.getItem('hasOnboardedd');
+
+        setTimeout(() => {
+          if (userToken) {
+            navigation.replace('MainTabs');
+          } else {
+            if (hasOnboarded) {
+              console.log('Login');
+              navigation.replace('Login');
+            } else {
+              console.log('Onboarding');
+              navigation.replace('Onboarding');
+            }
+          }
+        }, 2000);
+      } catch (e) {
+        console.error('Failed to check auth state:', e);
+        navigation.replace('Login');
+      }
+    };
+
+    checkAuth();
   }, [navigation]);
 
   return (
