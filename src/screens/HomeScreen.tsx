@@ -3,14 +3,11 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   PermissionsAndroid,
   Platform,
-  Image,
   StatusBar,
-  ImageStyle,
-  TextStyle,
+  ScrollView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
@@ -116,7 +113,6 @@ const HomeScreen = () => {
   const [rants, setRants] = useState(DUMMY_RANTS);
   const [currentLocation, setCurrentLocation] = useState('Loading...');
   const [locationError, setLocationError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   const requestLocationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -140,11 +136,12 @@ const HomeScreen = () => {
     }
     return true;
   };
-
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       async position => {
         const {latitude, longitude} = position.coords;
+        console.log('latitude', latitude);
+        console.log('longitude', longitude);
         try {
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
@@ -196,14 +193,6 @@ const HomeScreen = () => {
     );
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    // Simulate a refresh
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1500);
-  };
-
   const sortedRants = [...rants].sort((a, b) => {
     if (sortBy === 'recent') {
       return 0; // Maintain original order
@@ -213,7 +202,10 @@ const HomeScreen = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      stickyHeaderIndices={[1]}
+      showsVerticalScrollIndicator={false}>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="transparent"
@@ -223,60 +215,69 @@ const HomeScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Image
-            source={require('../assets/logo-ss.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <TouchableOpacity
-            style={styles.locationContainer}
-            onPress={getCurrentLocation}>
-            <Text style={styles.locationIcon}>📍</Text>
-            <Text style={styles.locationText}>
-              {locationError || currentLocation}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          <View style={styles.leftSection}>
+            <Text style={styles.logoText}>CITIZEN</Text>
+          </View>
+          
+          <View style={styles.centerSection}>
+            <View style={styles.levelBadge}>
+              <View style={styles.levelBadgeInner}>
+                <Text style={styles.levelIcon}>⭐️</Text>
+                <Text style={styles.levelText}>Level 5</Text>
+              </View>
+            </View>
+          </View>
 
-        {/* Sort Tabs */}
-        <View style={styles.sortTabsContainer}>
-          <View style={styles.sortTabs}>
+          <View style={styles.rightSection}>
             <TouchableOpacity
-              style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
-              onPress={() => setSortBy('recent')}>
-              <Text
-                style={[
-                  styles.sortTabText,
-                  sortBy === 'recent' && styles.activeTabText,
-                ]}>
-                Recent
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.sortTab,
-                sortBy === 'trending' && styles.activeTab,
-              ]}
-              onPress={() => setSortBy('trending')}>
-              <Text
-                style={[
-                  styles.sortTabText,
-                  sortBy === 'trending' && styles.activeTabText,
-                ]}>
-                Trending
+              style={styles.locationContainer}
+              onPress={getCurrentLocation}>
+              <Text style={styles.locationIcon}>📍</Text>
+              <Text style={styles.locationText} numberOfLines={1}>
+                {locationError || currentLocation}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
+      {/* Sort Tabs */}
+      <View style={styles.sortTabsContainer}>
+        <View style={styles.sortTabs}>
+          <TouchableOpacity
+            style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
+            onPress={() => setSortBy('recent')}>
+            <Text
+              style={[
+                styles.sortTabText,
+                sortBy === 'recent' && styles.activeTabText,
+              ]}>
+              Recent
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.sortTab,
+              sortBy === 'trending' && styles.activeTab,
+            ]}
+            onPress={() => setSortBy('trending')}>
+            <Text
+              style={[
+                styles.sortTabText,
+                sortBy === 'trending' && styles.activeTabText,
+              ]}>
+              Trending
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Rants List */}
-      <FlatList
-        data={sortedRants}
-        keyExtractor={item => item.id}
-        renderItem={({item}) => (
+      <View style={styles.rantsContainer}>
+        {sortedRants.map(item => (
           <RantCard
+            key={item.id}
             text={item.text}
             city={item.city}
             upvotes={item.upvotes}
@@ -284,12 +285,8 @@ const HomeScreen = () => {
             imageUrl={item.url}
             onUpvote={() => handleUpvote(item.id)}
           />
-        )}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
-      />
+        ))}
+      </View>
 
       {/* Floating Action Button */}
       <TouchableOpacity
@@ -300,7 +297,7 @@ const HomeScreen = () => {
           <Text style={styles.fabIcon}>+</Text>
         </View>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -310,83 +307,124 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 20 : 30,
-    paddingBottom: theme.spacing.xs,
-    paddingHorizontal: theme.spacing.md,
-    backgroundColor: '#2E86AB',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight,
+    backgroundColor: theme.colors.primary,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
-    zIndex: 10,
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.xs,
-    height: 60,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
   },
-  logo: {
-    width: 150,
-    height: 150,
-    marginLeft: -theme.spacing.xs,
-    resizeMode: 'contain',
-    borderRadius: 125, // Half of width/height
-    overflow: 'hidden',
-  } as ImageStyle,
+  leftSection: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  rightSection: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  logoContainer: {
+    height: 40,
+    justifyContent: 'center',
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: theme.colors.background,
+    letterSpacing: 1.5,
+    fontFamily: 'Poppins-Bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  levelBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 20,
+    padding: 2,
+  },
+  levelBadgeInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 18,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+  },
+  levelIcon: {
+    fontSize: 14,
+    marginRight: 4,
+  },
+  levelText: {
+    ...theme.typography.caption,
+    color: theme.colors.background,
+    fontWeight: '600',
+    fontSize: 12,
+  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.location,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.xs,
     borderRadius: theme.borderRadius.lg,
+    width: 140,
+    justifyContent: 'center',
   },
   locationIcon: {
-    marginRight: theme.spacing.xs,
-    fontSize: 16,
-  } as TextStyle,
+    fontSize: 14,
+    marginRight: 4,
+  },
   locationText: {
     ...theme.typography.caption,
-    color: theme.colors.textSecondary,
+    color: theme.colors.background,
     fontWeight: '500',
-    maxWidth: 120,
+    flex: 1,
   },
   sortTabsContainer: {
-    alignItems: 'center',
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
   },
   sortTabs: {
     flexDirection: 'row',
-    backgroundColor: theme.colors.location,
-    borderRadius: theme.borderRadius.lg,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    borderRadius: 30,
     padding: 4,
-    width: '70%',
+    width: 200,
+    alignSelf: 'center',
   },
   sortTab: {
     flex: 1,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     alignItems: 'center',
   },
   activeTab: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.background,
   },
   sortTabText: {
     ...theme.typography.caption,
     fontWeight: '600',
-    color: theme.colors.textSecondary,
-  },
-  activeTabText: {
     color: theme.colors.background,
   },
-  listContent: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.lg,
-    paddingBottom: 100, // Make room for FAB
+  activeTabText: {
+    color: theme.colors.primary,
+  },
+  rantsContainer: {
+    padding: theme.spacing.lg,
   },
   fabContainer: {
     position: 'absolute',
