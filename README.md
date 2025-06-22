@@ -1,97 +1,157 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+<div align="center">
+  <img src="https://raw.githubusercontent.com/adityasingh-AS/citizen/main/src/assets/logo-ss.png" alt="Citizen App Logo" width="150"/>
+  <h1>Citizen</h1>
+  <p><b>Voice Your Local Concerns. Drive Real Change.</b></p>
+  <p>
+    <a href="#-key-features">Features</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-project-structure">Structure</a> •
+    <a href="#-contributing">Contributing</a>
+  </p>
+</div>
 
-# Getting Started
+---
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+**Citizen** is a mobile platform that empowers individuals to report, discuss, and resolve local issues. From potholes to public safety, Citizen provides a space for community members to voice their concerns, rally support, and automatically escalate important issues to local authorities.
 
-## Step 1: Start Metro
+## ✨ Key Features
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- **🗣️ Voice Concerns Anonymously**: Post "rants" about local issues without revealing your identity.
+- **👍 Upvote & Amplify**: Support the issues you care about. The more upvotes a rant gets, the more visibility it receives.
+- **💬 Community Discussion**: Comment on rants to share insights, provide updates, or collaborate on solutions.
+- **📈 Reputation System**: Earn points and build your influence by posting, commenting, and contributing positively to the community.
+- **🤖 Automated Escalation**: When a rant reaches a critical threshold of upvotes, a formal complaint is automatically generated and sent to the relevant local authorities.
+- **👤 User Profiles**: Follow other users, track their contributions, and see the impact they're making.
+- **🏆 Achievements**: Unlock badges and achievements for being an active and responsible citizen.
+- **🔔 Activity Feed & Notifications**: Stay updated on the issues and users you follow.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 📱 Screenshots
 
-```sh
-# Using npm
+| Onboarding | Login | Home Feed |
+| :---: | :---: | :---: |
+| <img src="httpsprevioustoolcall" alt="Onboarding Screen" width="250"/> | <img src="httpsprevioustoolcall" alt="Login Screen" width="250"/> | <img src="httpsprevioustoolcall" alt="Home Feed" width="250"/> |
+
+| Post a Rant | Profile | Activity |
+| :---: | :---: | :---: |
+| <img src="httpsprevioustoolcall" alt="Post Rant Screen" width="250"/> | <img src="httpsprevioustoolcall" alt="Profile Screen" width="250"/> | <img src="httpsprevioustoolcall" alt="Activity Screen" width="250"/> |
+
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+| --- | --- |
+| **Frontend** | React Native, TypeScript, React Navigation, Axios, React Native Dotenv |
+| **Backend** | Node.js, Express, MongoDB, Mongoose, TypeScript, JWT |
+| **Styling** | Custom Stylesheets with a simple Theme System |
+| **Linting** | ESLint, Prettier |
+
+
+## 🚀 Getting Started
+
+Follow these instructions to get the project up and running on your local machine.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- [MongoDB](https://www.mongodb.com/try/download/community)
+- [Watchman](https://facebook.github.io/watchman/docs/install/) (for macOS)
+- [Xcode](https://developer.apple.com/xcode/) (for iOS) or [Android Studio](https://developer.android.com/studio) (for Android)
+
+### 1. Backend Setup (`citizen-be`)
+
+```bash
+# 1. Navigate to the backend directory
+cd citizen-be
+
+# 2. Install dependencies
+npm install
+
+# 3. Create a .env file in the root of the /citizen-be directory
+#    and add the following environment variables:
+#    MONGO_URI=your_mongodb_connection_string
+#    JWT_SECRET=your_jwt_secret
+#    PORT=5050
+
+# 4. Start the backend server
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+### 2. Frontend Setup (`Citizen`)
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+# 1. Navigate to the frontend directory
+cd Citizen
 
-### Android
+# 2. Install dependencies
+npm install
 
-```sh
-# Using npm
+# 3. Create a .env file in the root of the /Citizen directory
+#    and add the backend API URL:
+#
+#    For Android Emulator:
+#    API_URL=http://10.0.2.2:5050
+#
+#    For iOS Simulator:
+#    API_URL=http://localhost:5050
+
+# 4. For iOS, install CocoaPods dependencies
+cd ios && pod install && cd ..
+
+# 5. Start the Metro bundler (with cache reset)
+npm start -- --reset-cache
+
+# 6. In a new terminal, build and run the app
+# For Android:
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# For iOS:
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 📂 Project Structure
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+The project is organized into two main parts: `Citizen` (the React Native frontend) and `citizen-be` (the backend).
 
-## Step 3: Modify your app
+<details>
+<summary><b>Frontend (`Citizen/src`)</b></summary>
 
-Now that you have successfully run the app, let's make changes!
+```
+/src
+├── assets/          # Images and static files
+├── components/      # Reusable UI components
+├── navigators/      # Navigation logic and stack setup
+├── screens/         # All app screens
+├── services/        # API service layer (Axios)
+├── types/           # TypeScript type definitions
+└── utils/           # Utility functions and theme config
+```
+</details>
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+<details>
+<summary><b>Backend (`citizen-be/src`)</b></summary>
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```
+/src
+├── config/          # Database configuration
+├── controllers/     # Route handlers and business logic
+├── middleware/      # Custom middleware (e.g., auth)
+├── models/          # Mongoose schemas and models
+├── routes/          # API route definitions
+└── types/           # TypeScript type definitions
+```
+</details>
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## 🤝 Contributing
 
-## Congratulations! :tada:
+Contributions are welcome! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are warmly welcome.
 
-You've successfully run and modified your React Native App. :partying_face:
+1.  **Fork** the repository.
+2.  Create your feature branch (`git checkout -b feature/your-feature`).
+3.  **Commit** your changes (`git commit -m 'Add some feature'`).
+4.  **Push** to the branch (`git push origin feature/your-feature`).
+5.  Open a **Pull Request**.
 
-### Now what?
+## 📄 License
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

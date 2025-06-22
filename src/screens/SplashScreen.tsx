@@ -18,7 +18,7 @@ const SplashScreen = () => {
         const userToken = await AsyncStorage.getItem('userToken');
 
         // Check if onboarding has been completed
-        const hasOnboarded = await AsyncStorage.getItem('hasOnboardedd');
+        const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
 
         setTimeout(() => {
           if (userToken) {

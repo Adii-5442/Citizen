@@ -8,12 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, typography} from '../utils/theme';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigators/AppNavigator';
+import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {API_URL} from '@env';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,11 +31,35 @@ const RegisterScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  console.log(API_URL)
 
-  const handleRegister = () => {
-    // TODO: Implement register logic
-    console.log('Register attempt with:', {username, email, password});
-    navigation.replace('MainTabs');
+  const handleRegister = async () => {
+    if (!username || !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await api.post('/api/auth/register', {
+        username,
+        email,
+        password,
+      });
+      const {token, user} = response.data;
+
+      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+
+      navigation.replace('MainTabs');
+    } catch (error: any) {
+      console.log(error)
+      const errorMessage =
+        error.response?.data?.error || 'An unexpected error occurred.';
+      Alert.alert('Registration Failed', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -107,8 +136,15 @@ const RegisterScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
-          <Text style={styles.registerButtonText}>Sign Up</Text>
+        <TouchableOpacity
+          style={[styles.registerButton, isLoading && styles.loadingButton]}
+          onPress={handleRegister}
+          disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color={colors.background} />
+          ) : (
+            <Text style={styles.registerButtonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -182,6 +218,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
+  },
+  loadingButton: {
+    backgroundColor: colors.primary + '80',
   },
   registerButtonText: {
     ...typography.h2,
