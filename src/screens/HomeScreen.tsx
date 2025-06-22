@@ -13,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import RantCard from '../components/RantCard';
 import LinearGradient from 'react-native-linear-gradient';
-import theme from '../utils/theme';
+import theme, { colors } from '../utils/theme';
 
 type HomeScreenNavigationProp = any;
 
@@ -171,18 +171,34 @@ const HomeScreen = () => {
   // Sort tabs
   const renderSortTabs = () => (
     <View style={styles.sortTabsContainer}>
-      <View style={styles.sortTabs}>
+      <LinearGradient
+        colors={theme.colors.gradient}
+        style={styles.sortTabs}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}>
         <TouchableOpacity
           style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
           onPress={() => setSortBy('recent')}>
-          <Text style={[styles.sortTabText, sortBy === 'recent' && styles.activeTabText]}>Recent</Text>
+          <Text
+            style={[
+              styles.sortTabText,
+              sortBy === 'recent' && styles.activeTabText,
+            ]}>
+            Recent
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.sortTab, sortBy === 'trending' && styles.activeTab]}
           onPress={() => setSortBy('trending')}>
-          <Text style={[styles.sortTabText, sortBy === 'trending' && styles.activeTabText]}>Trending</Text>
+          <Text
+            style={[
+              styles.sortTabText,
+              sortBy === 'trending' && styles.activeTabText,
+            ]}>
+            Trending
+          </Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
     </View>
   );
 
@@ -196,6 +212,7 @@ const HomeScreen = () => {
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <RantCard
+            id={item.id}
             text={item.text}
             city={item.city}
             upvotes={item.upvotes}
@@ -272,18 +289,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sortTabsContainer: {
-    backgroundColor: theme.colors.background,
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.sm,
     paddingBottom: 2,
+    alignItems: 'center',
   },
   sortTabs: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     borderRadius: 30,
     padding: 4,
     width: 200,
-    alignSelf: 'center',
   },
   sortTab: {
     flex: 1,
@@ -334,6 +349,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: 20,
     padding: 4,
+    paddingHorizontal:10,
+    borderWidth:1,
+    borderColor:colors.background
   },
   levelBadgeInner: {
     flexDirection: 'row',
@@ -345,7 +363,8 @@ const styles = StyleSheet.create({
   },
   levelText: {
     ...theme.typography.caption,
-    fontWeight: '600',
+    fontWeight: '400',
+    fontSize:12,
     color: theme.colors.background,
   },
 });
