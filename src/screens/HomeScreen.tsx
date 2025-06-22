@@ -7,78 +7,15 @@ import {
   PermissionsAndroid,
   Platform,
   StatusBar,
-  ScrollView,
+  FlatList,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
-import {RootStackParamList} from '../navigators/AppNavigator';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import RantCard from '../components/RantCard';
+import LinearGradient from 'react-native-linear-gradient';
+import theme from '../utils/theme';
 
-type HomeScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Home'
->;
-
-// Custom theme with beautiful color palette
-const theme = {
-  colors: {
-    primary: '#2E86AB', // Vibrant Purple
-    secondary: '#00CEC9', // Turquoise
-    accent: '#FD79A8', // Pink
-    background: '#FFFFFF', // Pure White
-    card: '#F9F9FF', // Light Lavender
-    textPrimary: '#2D3436', // Dark Grey
-    textSecondary: '#636E72', // Medium Grey
-    border: '#E6E6F0', // Soft Lavender border
-    location: '#dfe6e9', // Light Blue Grey
-    success: '#00B894', // Green
-    gradient: ['#2E86AB', '#8E5CE7'], // Purple gradient
-  },
-  spacing: {
-    xs: 4,
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-  },
-  typography: {
-    h1: {
-      fontSize: 28,
-      fontWeight: '700',
-      fontFamily: 'Poppins-Bold',
-      color: '#2D3436',
-    },
-    h2: {
-      fontSize: 22,
-      fontWeight: '600',
-      fontFamily: 'Poppins-SemiBold',
-      color: '#2D3436',
-    },
-    body: {
-      fontSize: 16,
-      fontFamily: 'Poppins-Regular',
-      color: '#636E72',
-    },
-    caption: {
-      fontSize: 14,
-      fontFamily: 'Poppins-Regular',
-      color: '#636E72',
-    },
-    small: {
-      fontSize: 12,
-      fontFamily: 'Poppins-Regular',
-      color: '#636E72',
-    },
-  },
-  borderRadius: {
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    circle: 9999,
-  },
-};
+type HomeScreenNavigationProp = any;
 
 const DUMMY_RANTS = [
   {
@@ -195,109 +132,83 @@ const HomeScreen = () => {
 
   const sortedRants = [...rants].sort((a, b) => {
     if (sortBy === 'recent') {
-      return 0; // Maintain original order
+      return 0;
     } else {
       return b.upvotes - a.upvotes;
     }
   });
 
-  return (
-    <ScrollView
-      style={styles.container}
-      stickyHeaderIndices={[1]}
-      showsVerticalScrollIndicator={false}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="transparent"
-        translucent
-      />
-
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View style={styles.leftSection}>
-            <Text style={styles.logoText}>CITIZEN</Text>
-          </View>
-          
-          <View style={styles.centerSection}>
-            <View style={styles.levelBadge}>
-              <View style={styles.levelBadgeInner}>
-                <Text style={styles.levelIcon}>⭐️</Text>
-                <Text style={styles.levelText}>Level 5</Text>
-              </View>
+  // Header component
+  const renderHeader = () => (
+    <LinearGradient
+      colors={theme.colors.gradient}
+      style={styles.headerGradient}>
+      <View style={styles.headerRow}>
+        {/* Logo */}
+        <View style={styles.logoLeft}>
+          <Text style={styles.logoText}>CITIZEN</Text>
+        </View>
+        {/* Badge system (center) */}
+        <View style={styles.badgeCenter}>
+          <View style={styles.levelBadge}>
+            <View style={styles.levelBadgeInner}>
+              <Text style={styles.levelIcon}>⭐️</Text>
+              <Text style={styles.levelText}>Level 5</Text>
             </View>
           </View>
-
-          <View style={styles.rightSection}>
-            <TouchableOpacity
-              style={styles.locationContainer}
-              onPress={getCurrentLocation}>
-              <Text style={styles.locationIcon}>📍</Text>
-              <Text style={styles.locationText} numberOfLines={1}>
-                {locationError || currentLocation}
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
+        {/* Location */}
+        <TouchableOpacity style={styles.locationPill} onPress={getCurrentLocation}>
+          <Text style={styles.locationIcon}>📍</Text>
+          <Text style={styles.locationPillText} numberOfLines={1}>
+            {locationError || currentLocation}
+          </Text>
+        </TouchableOpacity>
       </View>
+    </LinearGradient>
+  );
 
-      {/* Sort Tabs */}
-      <View style={styles.sortTabsContainer}>
-        <View style={styles.sortTabs}>
-          <TouchableOpacity
-            style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
-            onPress={() => setSortBy('recent')}>
-            <Text
-              style={[
-                styles.sortTabText,
-                sortBy === 'recent' && styles.activeTabText,
-              ]}>
-              Recent
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.sortTab,
-              sortBy === 'trending' && styles.activeTab,
-            ]}
-            onPress={() => setSortBy('trending')}>
-            <Text
-              style={[
-                styles.sortTabText,
-                sortBy === 'trending' && styles.activeTabText,
-              ]}>
-              Trending
-            </Text>
-          </TouchableOpacity>
-        </View>
+  // Sort tabs
+  const renderSortTabs = () => (
+    <View style={styles.sortTabsContainer}>
+      <View style={styles.sortTabs}>
+        <TouchableOpacity
+          style={[styles.sortTab, sortBy === 'recent' && styles.activeTab]}
+          onPress={() => setSortBy('recent')}>
+          <Text style={[styles.sortTabText, sortBy === 'recent' && styles.activeTabText]}>Recent</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.sortTab, sortBy === 'trending' && styles.activeTab]}
+          onPress={() => setSortBy('trending')}>
+          <Text style={[styles.sortTabText, sortBy === 'trending' && styles.activeTabText]}>Trending</Text>
+        </TouchableOpacity>
       </View>
+    </View>
+  );
 
-      {/* Rants List */}
-      <View style={styles.rantsContainer}>
-        {sortedRants.map(item => (
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      {renderHeader()}
+      {renderSortTabs()}
+      <FlatList
+        data={sortedRants}
+        keyExtractor={item => item.id}
+        renderItem={({item}) => (
           <RantCard
-            key={item.id}
             text={item.text}
             city={item.city}
             upvotes={item.upvotes}
             timeAgo={item.timeAgo}
             imageUrl={item.url}
             onUpvote={() => handleUpvote(item.id)}
+            // Add more props as needed for Instagram-style
           />
-        ))}
-      </View>
-
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fabContainer}
-        onPress={() => navigation.navigate('PostRant')}
-        activeOpacity={0.9}>
-        <View style={styles.fab}>
-          <Text style={styles.fabIcon}>+</Text>
-        </View>
-      </TouchableOpacity>
-    </ScrollView>
+        )}
+        contentContainerStyle={styles.rantsContainer}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 };
 
@@ -306,97 +217,65 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
-    paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight,
-    backgroundColor: theme.colors.primary,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+  headerGradient: {
+    paddingTop: Platform.OS === 'ios' ? 54 : StatusBar.currentHeight || 32,
+    paddingBottom: 18,
+    paddingHorizontal: 18,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    elevation: 6,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 4,
   },
-  headerContent: {
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
+    justifyContent: 'space-between',
   },
-  leftSection: {
+  logoLeft: {
     flex: 1,
     alignItems: 'flex-start',
   },
-  centerSection: {
+  badgeCenter: {
     flex: 1,
     alignItems: 'center',
-  },
-  rightSection: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  logoContainer: {
-    height: 40,
-    justifyContent: 'center',
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
     color: theme.colors.background,
-    letterSpacing: 1.5,
+    letterSpacing: 2,
     fontFamily: 'Poppins-Bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.1)',
-    textShadowOffset: { width: 0, height: 1 },
+    textShadowColor: 'rgba(0,0,0,0.08)',
+    textShadowOffset: {width: 0, height: 1},
     textShadowRadius: 2,
   },
-  levelBadge: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 20,
-    padding: 2,
-  },
-  levelBadgeInner: {
+  locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 18,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    maxWidth: 140,
   },
-  levelIcon: {
-    fontSize: 14,
+  locationIcon: {
+    fontSize: 15,
     marginRight: 4,
   },
-  levelText: {
+  locationPillText: {
     ...theme.typography.caption,
     color: theme.colors.background,
     fontWeight: '600',
-    fontSize: 12,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.lg,
-    width: 140,
-    justifyContent: 'center',
-  },
-  locationIcon: {
-    fontSize: 14,
-    marginRight: 4,
-  },
-  locationText: {
-    ...theme.typography.caption,
-    color: theme.colors.background,
-    fontWeight: '500',
     flex: 1,
   },
   sortTabsContainer: {
     backgroundColor: theme.colors.background,
     paddingHorizontal: theme.spacing.md,
     paddingTop: theme.spacing.sm,
+    paddingBottom: 2,
   },
   sortTabs: {
     flexDirection: 'row',
@@ -425,6 +304,7 @@ const styles = StyleSheet.create({
   },
   rantsContainer: {
     padding: theme.spacing.lg,
+    paddingBottom: 120,
   },
   fabContainer: {
     position: 'absolute',
@@ -449,6 +329,24 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '300',
     marginBottom: 2,
+  },
+  levelBadge: {
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 20,
+    padding: 4,
+  },
+  levelBadgeInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  levelIcon: {
+    fontSize: 15,
+    marginRight: 4,
+  },
+  levelText: {
+    ...theme.typography.caption,
+    fontWeight: '600',
+    color: theme.colors.background,
   },
 });
 

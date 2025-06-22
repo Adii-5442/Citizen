@@ -4,7 +4,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {View, StyleSheet, Platform} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {colors} from '../utils/theme';
+import theme from '../utils/theme';
+import LinearGradient from 'react-native-linear-gradient';
 
 // Import screens
 import HomeScreen from '../screens/HomeScreen';
@@ -45,14 +46,16 @@ const MainTabs = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: theme.colors.background,
           borderTopWidth: 1,
-          borderTopColor: colors.border,
-          height: Platform.OS === 'ios' ? 85 : 60,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
+          borderTopColor: theme.colors.border,
+          height: Platform.OS === 'ios' ? 90 : 70,
+          paddingTop: 10,
+          paddingBottom: Platform.OS === 'ios' ? 30 : 10,
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textLight,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
+        tabBarShowLabel: false,
       }}>
       <Tab.Screen
         name="Home"
@@ -77,9 +80,11 @@ const MainTabs = () => {
         component={PostRantScreen}
         options={{
           tabBarIcon: () => (
-            <View style={styles.centerButton}>
-              <MaterialIcons name="add" size={32} color={colors.background} />
-            </View>
+            <LinearGradient
+              colors={theme.colors.gradient}
+              style={styles.centerButton}>
+              <MaterialIcons name="add" size={32} color="#fff" />
+            </LinearGradient>
           ),
           tabBarLabel: () => null,
         }}
@@ -133,21 +138,22 @@ const AppNavigator = () => {
 
 const styles = StyleSheet.create({
   centerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Platform.OS === 'ios' ? 20 : 0,
-    shadowColor: '#000',
+    bottom: Platform.OS === 'ios' ? 25 : 20,
+    shadowColor: theme.colors.primary,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: theme.colors.background,
   },
 });
 

@@ -8,12 +8,13 @@ import {
   Animated,
   Dimensions,
 } from 'react-native';
-import {RantCardProps} from '../types';
-import {colors, spacing, typography} from '../utils/theme';
+import {RantCardProps} from '../types/index';
+import theme, {colors, spacing, typography} from '../utils/theme';
 
 const {width} = Dimensions.get('window');
 
 const RantCard = ({
+  id,
   text,
   city,
   upvotes,
@@ -27,7 +28,7 @@ const RantCard = ({
   const handleUpvote = () => {
     if (!isUpvoted) {
       setIsUpvoted(true);
-      onUpvote();
+      onUpvote(id);
 
       // Animation effect
       Animated.sequence([
@@ -107,7 +108,7 @@ const RantCard = ({
 
 const rantStyles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.card,
     borderRadius: 12,
     marginBottom: spacing.md,
     overflow: 'hidden',
@@ -116,6 +117,8 @@ const rantStyles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   contentContainer: {
     padding: spacing.md,
@@ -143,13 +146,13 @@ const rantStyles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.textLight,
+    backgroundColor: colors.textSecondary,
     marginHorizontal: spacing.xs,
     opacity: 0.5,
   },
   timeText: {
     ...typography.caption,
-    color: colors.textLight,
+    color: colors.textSecondary,
   },
   rantText: {
     ...typography.body,
@@ -158,8 +161,8 @@ const rantStyles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   rantImage: {
-    width: width - spacing.lg * 2,
-    height: 200,
+    width: '100%',
+    height: 220,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -174,15 +177,15 @@ const rantStyles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     borderRadius: 8,
-    backgroundColor: colors.card,
+    backgroundColor: '#f1f5f9',
     marginRight: spacing.sm,
   },
   upvotedButton: {
-    backgroundColor: colors.primary + '15',
+    backgroundColor: colors.primary + '20',
   },
   upvoteIcon: {
     fontSize: 14,
-    color: colors.textLight,
+    color: colors.textSecondary,
     marginRight: 4,
   },
   upvotedIcon: {
@@ -191,7 +194,7 @@ const rantStyles = StyleSheet.create({
   upvoteCount: {
     ...typography.caption,
     fontWeight: '600',
-    color: colors.textLight,
+    color: colors.textSecondary,
   },
   upvotedCount: {
     color: colors.primary,
@@ -199,10 +202,12 @@ const rantStyles = StyleSheet.create({
   commentIcon: {
     fontSize: 14,
     marginRight: 4,
+    color: colors.textSecondary,
   },
   commentText: {
     ...typography.caption,
-    color: colors.textLight,
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
 });
 
