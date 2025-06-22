@@ -8,12 +8,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, typography} from '../utils/theme';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigators/AppNavigator';
+import api from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -25,11 +29,29 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    // TODO: Implement login logic
-    console.log('Login attempt with:', {email, password});
-    navigation.replace('MainTabs');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await api.post('/api/auth/login', {email, password});
+      const {token, user} = response.data;
+
+      await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+
+      navigation.replace('MainTabs');
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error || 'An unexpected error occurred.';
+      Alert.alert('Login Failed', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -93,8 +115,15 @@ const LoginScreen = () => {
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Sign In</Text>
+        <TouchableOpacity
+          style={[styles.loginButton, isLoading && styles.loadingButton]}
+          onPress={handleLogin}
+          disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator color={colors.background} />
+          ) : (
+            <Text style={styles.loginButtonText}>Sign In</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -173,6 +202,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 6,
+  },
+  loadingButton: {
+    backgroundColor: colors.primary + '80', // Semi-transparent
   },
   loginButtonText: {
     ...typography.h2,
