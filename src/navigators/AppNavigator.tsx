@@ -2,7 +2,7 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, StyleSheet, Platform} from 'react-native';
+import {StyleSheet, Platform} from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import theme from '../utils/theme';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,6 +18,7 @@ import SplashScreen from '../screens/SplashScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import RantDetailScreen from '../screens/RantDetailScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PostRant: undefined;
   PetitionGenerated: {rantId: string};
+  RantDetail: {rant: any};
 };
 
 export type MainTabParamList = {
@@ -131,6 +133,7 @@ const AppNavigator = () => {
           name="PetitionGenerated"
           component={PetitionGeneratedScreen}
         />
+        <Stack.Screen name="RantDetail" component={RantDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

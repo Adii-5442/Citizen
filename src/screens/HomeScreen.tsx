@@ -9,43 +9,58 @@ import {
   StatusBar,
   FlatList,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import Geolocation from '@react-native-community/geolocation';
 import RantCard from '../components/RantCard';
 import LinearGradient from 'react-native-linear-gradient';
 import theme, { colors } from '../utils/theme';
-
-type HomeScreenNavigationProp = any;
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigators/AppNavigator';
 
 const DUMMY_RANTS = [
   {
     id: '1',
+    user: {
+      name: 'Maria Garcia',
+      avatarUrl: 'https://randomuser.me/api/portraits/women/31.jpg',
+    },
     text: 'The potholes on Main Street are getting worse every day! The city needs to address this issue before someone gets hurt or damages their vehicle.',
     url: 'https://assets.dnainfo.com/generated/photo/2014/09/3-1411740404.jpg/extralarge.jpg',
     city: 'New York',
-    upvotes: 15,
+    upvotes: 152,
+    commentCount: 12,
     timeAgo: '2h ago',
   },
   {
     id: '2',
+    user: {
+      name: 'David Smith',
+      avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
+    },
     text: 'Why is the recycling collection always late in our neighborhood? This is the third week in a row that pickup has been delayed by at least a day.',
     url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_Necw8YXxy8MjohW8Ayr3cl3r3yxvbhZAIivUbgcVTR7HVjuoLtk9Dj7aVEbwMQSD63o&usqp=CAU',
     city: 'Los Angeles',
-    upvotes: 8,
+    upvotes: 89,
+    commentCount: 7,
     timeAgo: '5h ago',
   },
   {
     id: '3',
+    user: {
+      name: 'Chen Wang',
+      avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
+    },
     text: 'The new park beautification project has been abandoned halfway through. Now we have half a nice park and half an eyesore!',
     url: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGFya3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60',
     city: 'Chicago',
-    upvotes: 23,
+    upvotes: 231,
+    commentCount: 28,
     timeAgo: '1d ago',
   },
 ];
 
 const HomeScreen = () => {
-  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [sortBy, setSortBy] = useState<'recent' | 'trending'>('recent');
   const [rants, setRants] = useState(DUMMY_RANTS);
   const [currentLocation, setCurrentLocation] = useState('Loading...');
@@ -170,7 +185,7 @@ const HomeScreen = () => {
 
   // Sort tabs
   const renderSortTabs = () => (
-    <View style={styles.sortTabsContainer}>
+    <View style={styles.floatingSortTabsWrapper}>
       <LinearGradient
         colors={theme.colors.gradient}
         style={styles.sortTabs}
@@ -206,21 +221,27 @@ const HomeScreen = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       {renderHeader()}
-      {renderSortTabs()}
       <FlatList
         data={sortedRants}
         keyExtractor={item => item.id}
+        ListHeaderComponent={renderSortTabs}
         renderItem={({item}) => (
-          <RantCard
-            id={item.id}
-            text={item.text}
-            city={item.city}
-            upvotes={item.upvotes}
-            timeAgo={item.timeAgo}
-            imageUrl={item.url}
-            onUpvote={() => handleUpvote(item.id)}
-            // Add more props as needed for Instagram-style
-          />
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('RantDetail', { rant: item })}
+          >
+            <RantCard
+              id={item.id}
+              user={item.user}
+              text={item.text}
+              city={item.city}
+              upvotes={item.upvotes}
+              commentCount={item.commentCount}
+              timeAgo={item.timeAgo}
+              imageUrl={item.url}
+              onUpvote={() => handleUpvote(item.id)}
+            />
+          </TouchableOpacity>
         )}
         contentContainerStyle={styles.rantsContainer}
         showsVerticalScrollIndicator={false}
@@ -288,17 +309,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
-  sortTabsContainer: {
-    paddingHorizontal: theme.spacing.md,
-    paddingTop: theme.spacing.sm,
-    paddingBottom: 2,
+  floatingSortTabsWrapper: {
     alignItems: 'center',
+    marginTop:-10,
+    backgroundColor: 'transparent',
+    marginBottom: 5,
   },
   sortTabs: {
     flexDirection: 'row',
     borderRadius: 30,
     padding: 4,
     width: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 8,
   },
   sortTab: {
     flex: 1,
