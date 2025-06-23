@@ -6,17 +6,18 @@ import {
   TouchableOpacity,
   Image,
   Animated,
-  Dimensions,
 } from 'react-native';
-import {RantCardProps} from '../types';
-import {colors, spacing, typography} from '../utils/theme';
-
-const {width} = Dimensions.get('window');
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {RantCardProps} from '../types/index';
+import theme, {colors, spacing, typography} from '../utils/theme';
 
 const RantCard = ({
+  id,
+  user,
   text,
   city,
   upvotes,
+  commentCount,
   timeAgo,
   imageUrl,
   onUpvote,
@@ -25,184 +26,162 @@ const RantCard = ({
   const scaleAnim = useState(new Animated.Value(1))[0];
 
   const handleUpvote = () => {
+    // Animate and call onUpvote only if not already upvoted
     if (!isUpvoted) {
       setIsUpvoted(true);
-      onUpvote();
-
-      // Animation effect
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
+      onUpvote(id);
+      Animated.spring(scaleAnim, {
+        toValue: 1.15,
+        friction: 2,
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.spring(scaleAnim, {
           toValue: 1,
-          duration: 150,
+          friction: 2,
           useNativeDriver: true,
-        }),
-      ]).start();
+        }).start();
+      });
     }
   };
 
   return (
-    <View style={rantStyles.cardContainer}>
+    <View style={styles.cardContainer}>
+      {/* Card Header */}
+      <View style={styles.cardHeader}>
+        <Image source={{uri: user.avatarUrl}} style={styles.avatar} />
+        <View style={styles.headerText}>
+          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.cityText}>{city}</Text>
+        </View>
+        <TouchableOpacity>
+          <MaterialIcons name="more-horiz" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Image */}
       {imageUrl && (
-        <Image
-          source={{uri: imageUrl}}
-          style={rantStyles.rantImage}
-          resizeMode="cover"
-        />
+        <Image source={{uri: imageUrl}} style={styles.rantImage} />
       )}
 
-      <View style={rantStyles.contentContainer}>
-        <View style={rantStyles.cardHeader}>
-          <View style={rantStyles.locationContainer}>
-            <Text style={rantStyles.locationIcon}>📍</Text>
-            <Text style={rantStyles.cityText}>{city}</Text>
-            <View style={rantStyles.dotSeparator} />
-            <Text style={rantStyles.timeText}>{timeAgo}</Text>
-          </View>
-        </View>
+      {/* Action Buttons */}
+      <View style={styles.actionsContainer}>
+        <Animated.View style={{transform: [{scale: scaleAnim}]}}>
+          <TouchableOpacity onPress={handleUpvote} style={styles.actionButton}>
+            <MaterialIcons
+              name={isUpvoted ? 'thumb-up' : 'thumb-up-off-alt'}
+              size={24}
+              color={isUpvoted ? colors.primary : colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+        <TouchableOpacity style={styles.actionButton}>
+          <MaterialIcons
+            name="chat-bubble-outline"
+            size={24}
+            color={colors.textSecondary}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.lastActionButton]}>
+          <MaterialIcons name="share" size={24} color={colors.textSecondary} />
+        </TouchableOpacity>
+      </View>
 
-        <Text style={rantStyles.rantText} numberOfLines={3}>
+      {/* Content */}
+      <View style={styles.contentContainer}>
+        <Text style={styles.upvoteText}>{upvotes} upvotes</Text>
+        <Text style={styles.rantText} numberOfLines={2}>
+          <Text style={styles.userName}>{user.name}</Text>
+          {'  '}
           {text}
         </Text>
-
-      <View style={rantStyles.cardFooter}>
-        <TouchableOpacity
-          onPress={handleUpvote}
-          activeOpacity={0.7}
-            style={[
-              rantStyles.actionButton,
-              isUpvoted && rantStyles.upvotedButton,
-            ]}>
-          <Animated.View style={{transform: [{scale: scaleAnim}]}}>
-            <Text
-              style={[
-                rantStyles.upvoteIcon,
-                isUpvoted && rantStyles.upvotedIcon,
-              ]}>
-              ▲
-            </Text>
-          </Animated.View>
-          <Text
-            style={[
-              rantStyles.upvoteCount,
-              isUpvoted && rantStyles.upvotedCount,
-            ]}>
-            {upvotes}
+        <TouchableOpacity>
+          <Text style={styles.commentText}>
+            See all {commentCount} comments
           </Text>
         </TouchableOpacity>
-
-          <TouchableOpacity style={rantStyles.actionButton} activeOpacity={0.7}>
-          <Text style={rantStyles.commentIcon}>💬</Text>
-          <Text style={rantStyles.commentText}>Comment</Text>
-        </TouchableOpacity>
-        </View>
+        <Text style={styles.timeText}>{timeAgo}</Text>
       </View>
     </View>
   );
 };
 
-const rantStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: colors.background,
-    borderRadius: 12,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
+    backgroundColor: colors.card,
+    borderRadius: spacing.md,
+    marginBottom: spacing.lg,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  contentContainer: {
-    padding: spacing.md,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    padding: spacing.md,
   },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  locationIcon: {
-    fontSize: 14,
-    marginRight: spacing.xs,
+  headerText: {
+    flex: 1,
+  },
+  userName: {
+    ...typography.body,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   cityText: {
     ...typography.caption,
+    color: colors.textSecondary,
+  },
+  rantImage: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+  },
+  actionButton: {
+    padding: spacing.sm,
+  },
+  lastActionButton: {
+    marginLeft: 'auto',
+  },
+  contentContainer: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
+  },
+  upvoteText: {
+    ...typography.body,
     fontWeight: '600',
     color: colors.textPrimary,
-  },
-  dotSeparator: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.textLight,
-    marginHorizontal: spacing.xs,
-    opacity: 0.5,
-  },
-  timeText: {
-    ...typography.caption,
-    color: colors.textLight,
+    marginBottom: spacing.xs,
   },
   rantText: {
     ...typography.body,
-    lineHeight: 22,
     color: colors.textPrimary,
-    marginBottom: spacing.md,
-  },
-  rantImage: {
-    width: width - spacing.lg * 2,
-    height: 200,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: 8,
-    backgroundColor: colors.card,
-    marginRight: spacing.sm,
-  },
-  upvotedButton: {
-    backgroundColor: colors.primary + '15',
-  },
-  upvoteIcon: {
-    fontSize: 14,
-    color: colors.textLight,
-    marginRight: 4,
-  },
-  upvotedIcon: {
-    color: colors.primary,
-  },
-  upvoteCount: {
-    ...typography.caption,
-    fontWeight: '600',
-    color: colors.textLight,
-  },
-  upvotedCount: {
-    color: colors.primary,
-  },
-  commentIcon: {
-    fontSize: 14,
-    marginRight: 4,
+    lineHeight: 22,
+    marginBottom: spacing.xs,
   },
   commentText: {
     ...typography.caption,
-    color: colors.textLight,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+  },
+  timeText: {
+    ...typography.small,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
   },
 });
 
