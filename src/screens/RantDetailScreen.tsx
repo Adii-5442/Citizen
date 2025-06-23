@@ -14,6 +14,8 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, spacing, typography} from '../utils/theme';
+import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigators/AppNavigator';
 
 // Mock comment data
 const COMMENTS = [
@@ -31,7 +33,8 @@ const COMMENTS = [
   },
 ];
 
-const RantDetailScreen = ({ route, navigation }) => {
+type RantDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'RantDetail'>;
+const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
   // For now, use mock data. In real use, get rant from route.params
   const rant = route?.params?.rant || {
     id: '1',
@@ -51,7 +54,7 @@ const RantDetailScreen = ({ route, navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <MaterialIcons name="arrow-back" size={28} color={colors.background} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Rant Details</Text>
+          <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">{rant.title || 'Rant Details'}</Text>
           <View style={{width: 28}} />
         </View>
       </LinearGradient>
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
+    fontWeight: '700' as '700',
   },
   commentRow: {
     flexDirection: 'row',
@@ -253,6 +257,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'transparent',
+    marginBottom: 16,
   },
   inputBar: {
     flexDirection: 'row',
