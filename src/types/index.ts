@@ -11,5 +11,6 @@ export interface RantCardProps {
   timeAgo: string;
   imageUrl?: string;
   onUpvote: (id: string) => void;
+  title: string;
   // Add any other props you need for the card
 } 

@@ -24,8 +24,9 @@ const DUMMY_RANTS = [
       name: 'Maria Garcia',
       avatarUrl: 'https://randomuser.me/api/portraits/women/31.jpg',
     },
+    title: 'Potholes on Main Street',
     text: 'The potholes on Main Street are getting worse every day! The city needs to address this issue before someone gets hurt or damages their vehicle.',
-    url: 'https://assets.dnainfo.com/generated/photo/2014/09/3-1411740404.jpg/extralarge.jpg',
+    imageUrl: 'https://assets.dnainfo.com/generated/photo/2014/09/3-1411740404.jpg/extralarge.jpg',
     city: 'New York',
     upvotes: 152,
     commentCount: 12,
@@ -37,8 +38,9 @@ const DUMMY_RANTS = [
       name: 'David Smith',
       avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg',
     },
+    title: 'Late Recycling Collection',
     text: 'Why is the recycling collection always late in our neighborhood? This is the third week in a row that pickup has been delayed by at least a day.',
-    url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_Necw8YXxy8MjohW8Ayr3cl3r3yxvbhZAIivUbgcVTR7HVjuoLtk9Dj7aVEbwMQSD63o&usqp=CAU',
+    imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_Necw8YXxy8MjohW8Ayr3cl3r3yxvbhZAIivUbgcVTR7HVjuoLtk9Dj7aVEbwMQSD63o&usqp=CAU',
     city: 'Los Angeles',
     upvotes: 89,
     commentCount: 7,
@@ -50,8 +52,9 @@ const DUMMY_RANTS = [
       name: 'Chen Wang',
       avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg',
     },
+    title: 'Abandoned Park Project',
     text: 'The new park beautification project has been abandoned halfway through. Now we have half a nice park and half an eyesore!',
-    url: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGFya3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60',
+    imageUrl: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGFya3xlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60',
     city: 'Chicago',
     upvotes: 231,
     commentCount: 28,
@@ -233,12 +236,13 @@ const HomeScreen = () => {
             <RantCard
               id={item.id}
               user={item.user}
+              title={item.title}
               text={item.text}
               city={item.city}
               upvotes={item.upvotes}
               commentCount={item.commentCount}
               timeAgo={item.timeAgo}
-              imageUrl={item.url}
+              imageUrl={item.imageUrl}
               onUpvote={() => handleUpvote(item.id)}
             />
           </TouchableOpacity>

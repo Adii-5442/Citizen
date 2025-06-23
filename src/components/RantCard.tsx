@@ -14,6 +14,7 @@ import theme, {colors, spacing, typography} from '../utils/theme';
 const RantCard = ({
   id,
   user,
+  title,
   text,
   city,
   upvotes,
@@ -89,6 +90,7 @@ const RantCard = ({
       {/* Content */}
       <View style={styles.contentContainer}>
         <Text style={styles.upvoteText}>{upvotes} upvotes</Text>
+        {title && <Text style={styles.rantTitle}>{title}</Text>}
         <Text style={styles.rantText} numberOfLines={2}>
           <Text style={styles.userName}>{user.name}</Text>
           {'  '}
@@ -182,6 +184,13 @@ const styles = StyleSheet.create({
     ...typography.small,
     color: colors.textSecondary,
     textTransform: 'uppercase',
+  },
+  rantTitle: {
+    ...typography.h2,
+    fontSize: 18,
+    color: colors.primary,
+    marginBottom: 2,
+    fontWeight: '700',
   },
 });
 
