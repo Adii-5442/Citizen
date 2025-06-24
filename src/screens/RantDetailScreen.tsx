@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -35,6 +35,8 @@ const COMMENTS = [
 
 type RantDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'RantDetail'>;
 const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
+  const commentInputRef = useRef<TextInput>(null);
+  
   // For now, use mock data. In real use, get rant from route.params
   const rant = route?.params?.rant || {
     id: '1',
@@ -47,6 +49,44 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
     timeAgo: '2h ago',
   };
 
+  // Focus on comment input when screen loads (useful when coming from comment icon tap)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+    }, 500); // Small delay to ensure screen is fully loaded
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const renderRantDetails = () => (
+    <View style={styles.scrollContent}>
+      {/* Image */}
+      {rant.imageUrl && (
+        <Image source={{uri: rant.imageUrl}} style={styles.rantImage} />
+      )}
+      {/* User Info */}
+      <View style={styles.userRow}>
+        <Image source={{uri: rant.user.avatarUrl}} style={styles.avatar} />
+        <View style={{flex: 1}}>
+          <Text style={styles.userName}>{rant.user.name}</Text>
+          <Text style={styles.cityText}>{rant.city} • {rant.timeAgo}</Text>
+        </View>
+        <View style={styles.upvoteBox}>
+          <MaterialIcons name="thumb-up" size={18} color={colors.primary} />
+          <Text style={styles.upvoteCount}>{rant.upvotes}</Text>
+        </View>
+      </View>
+      {/* Rant Text */}
+      <Text style={styles.rantText}>{rant.text}</Text>
+      {/* Divider */}
+      <View style={styles.divider} />
+      {/* Comments */}
+      <Text style={styles.commentsTitle}>Comments</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <LinearGradient colors={colors.gradient} style={styles.headerGradient}>
@@ -58,46 +98,23 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
           <View style={{width: 28}} />
         </View>
       </LinearGradient>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Image */}
-        {rant.imageUrl && (
-          <Image source={{uri: rant.imageUrl}} style={styles.rantImage} />
-        )}
-        {/* User Info */}
-        <View style={styles.userRow}>
-          <Image source={{uri: rant.user.avatarUrl}} style={styles.avatar} />
-          <View style={{flex: 1}}>
-            <Text style={styles.userName}>{rant.user.name}</Text>
-            <Text style={styles.cityText}>{rant.city} • {rant.timeAgo}</Text>
-          </View>
-          <View style={styles.upvoteBox}>
-            <MaterialIcons name="thumb-up" size={18} color={colors.primary} />
-            <Text style={styles.upvoteCount}>{rant.upvotes}</Text>
-          </View>
-        </View>
-        {/* Rant Text */}
-        <Text style={styles.rantText}>{rant.text}</Text>
-        {/* Divider */}
-        <View style={styles.divider} />
-        {/* Comments */}
-        <Text style={styles.commentsTitle}>Comments</Text>
-        <FlatList
-          data={COMMENTS}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <View style={styles.commentRow}>
-              <Image source={{uri: item.user.avatarUrl}} style={styles.commentAvatar} />
-              <View style={styles.commentContent}>
-                <Text style={styles.commentUser}>{item.user.name}</Text>
-                <Text style={styles.commentText}>{item.text}</Text>
-                <Text style={styles.commentTime}>{item.timeAgo}</Text>
-              </View>
+      <FlatList
+        data={COMMENTS}
+        keyExtractor={item => item.id}
+        ListHeaderComponent={renderRantDetails}
+        renderItem={({item}) => (
+          <View style={styles.commentRow}>
+            <Image source={{uri: item.user.avatarUrl}} style={styles.commentAvatar} />
+            <View style={styles.commentContent}>
+              <Text style={styles.commentUser}>{item.user.name}</Text>
+              <Text style={styles.commentText}>{item.text}</Text>
+              <Text style={styles.commentTime}>{item.timeAgo}</Text>
             </View>
-          )}
-          contentContainerStyle={{paddingBottom: 80}}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+          </View>
+        )}
+        contentContainerStyle={{paddingBottom: 80}}
+        showsVerticalScrollIndicator={false}
+      />
       {/* Comment Input */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -106,6 +123,7 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
       >
         <View style={styles.inputBar}>
           <TextInput
+            ref={commentInputRef}
             style={styles.input}
             placeholder="Add a comment..."
             placeholderTextColor={colors.textSecondary}
