@@ -10,8 +10,8 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, spacing, typography} from '../utils/theme';
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -89,15 +89,14 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={colors.gradient} style={styles.headerGradient}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={28} color={colors.background} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">{rant.title || 'Rant Details'}</Text>
-          <View style={{width: 28}} />
-        </View>
-      </LinearGradient>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={28} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">{rant.title || 'Rant Details'}</Text>
+        <View style={{width: 28}} />
+      </View>
       <FlatList
         data={COMMENTS}
         keyExtractor={item => item.id}
@@ -142,27 +141,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  headerGradient: {
-    paddingTop: 54,
-    paddingBottom: 18,
-    paddingHorizontal: 18,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  headerRow: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 54 : StatusBar.currentHeight || 32,
+    paddingBottom: 12,
+    paddingHorizontal: 18,
+    backgroundColor: colors.background,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
   },
   headerTitle: {
-    ...typography.h2,
-    color: colors.background,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '600' as '600',
+    color: colors.textPrimary,
+    letterSpacing: 0.1,
   },
   scrollContent: {
     padding: spacing.lg,
