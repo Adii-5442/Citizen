@@ -9,12 +9,19 @@ import {
   Platform,
   ImageStyle,
   TextStyle,
+  Alert,
+  Dimensions,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, typography} from '../utils/theme';
+import {useNavigation} from '@react-navigation/native';
+
+const {width: screenWidth} = Dimensions.get('window');
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
   const [profileImage, _setProfileImage] = useState(null);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [userStats] = useState({
     rants: 42,
     followers: 128,
@@ -26,14 +33,63 @@ const ProfileScreen = () => {
     console.log('Upload image');
   };
 
+  const handleSettingsPress = () => {
+    setShowLogoutPopup(true);
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            // TODO: Clear cache and logout logic
+            console.log('Logging out...');
+            // Clear user data, tokens, etc.
+            // Navigate to login screen
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Login'}],
+            });
+          },
+        },
+      ]
+    );
+    setShowLogoutPopup(false);
+  };
+
+  const handleClosePopup = () => {
+    setShowLogoutPopup(false);
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.settingsButton}>
+        <TouchableOpacity style={styles.settingsButton} onPress={handleSettingsPress}>
           <MaterialIcons name="settings" size={24} color={colors.text} />
         </TouchableOpacity>
       </View>
+
+      {/* Logout Popup */}
+      {showLogoutPopup && (
+        <View style={styles.popupOverlay}>
+          <TouchableOpacity style={styles.popupBackdrop} onPress={handleClosePopup} />
+          <View style={styles.logoutPopup}>
+            <TouchableOpacity style={styles.logoutOption} onPress={handleLogout}>
+              <MaterialIcons name="logout" size={20} color={colors.error} />
+              <Text style={styles.logoutText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Profile Section */}
       <View style={styles.profileSection}>
@@ -309,6 +365,51 @@ const styles = StyleSheet.create({
   achievementDescription: {
     ...typography.caption,
     color: colors.textLight,
+  },
+  popupOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popupBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  logoutPopup: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 100 : 80,
+    right: 20,
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 120,
+  },
+  logoutOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  logoutText: {
+    ...typography.body,
+    color: colors.error,
+    marginLeft: 12,
+    fontWeight: '500' as '500',
   },
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, spacing, typography} from '../utils/theme';
 import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -35,6 +35,8 @@ const COMMENTS = [
 
 type RantDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'RantDetail'>;
 const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
+  const commentInputRef = useRef<TextInput>(null);
+  
   // For now, use mock data. In real use, get rant from route.params
   const rant = route?.params?.rant || {
     id: '1',
@@ -47,57 +49,71 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
     timeAgo: '2h ago',
   };
 
+  // Focus on comment input when screen loads (useful when coming from comment icon tap)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (commentInputRef.current) {
+        commentInputRef.current.focus();
+      }
+    }, 500); // Small delay to ensure screen is fully loaded
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const renderRantDetails = () => (
+    <View style={styles.scrollContent}>
+      {/* Image */}
+      {rant.imageUrl && (
+        <Image source={{uri: rant.imageUrl}} style={styles.rantImage} />
+      )}
+      {/* User Info */}
+      <View style={styles.userRow}>
+        <Image source={{uri: rant.user.avatarUrl}} style={styles.avatar} />
+        <View style={{flex: 1}}>
+          <Text style={styles.userName}>{rant.user.name}</Text>
+          <Text style={styles.cityText}>{rant.city} • {rant.timeAgo}</Text>
+        </View>
+        <View style={styles.upvoteBox}>
+          <MaterialIcons name="thumb-up" size={18} color={colors.primary} />
+          <Text style={styles.upvoteCount}>{rant.upvotes}</Text>
+        </View>
+      </View>
+      {/* Rant Text */}
+      <Text style={styles.rantText}>{rant.text}</Text>
+      {/* Divider */}
+      <View style={styles.divider} />
+      {/* Comments */}
+      <Text style={styles.commentsTitle}>Comments</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <LinearGradient colors={colors.gradient} style={styles.headerGradient}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={28} color={colors.background} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">{rant.title || 'Rant Details'}</Text>
-          <View style={{width: 28}} />
-        </View>
-      </LinearGradient>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Image */}
-        {rant.imageUrl && (
-          <Image source={{uri: rant.imageUrl}} style={styles.rantImage} />
-        )}
-        {/* User Info */}
-        <View style={styles.userRow}>
-          <Image source={{uri: rant.user.avatarUrl}} style={styles.avatar} />
-          <View style={{flex: 1}}>
-            <Text style={styles.userName}>{rant.user.name}</Text>
-            <Text style={styles.cityText}>{rant.city} • {rant.timeAgo}</Text>
-          </View>
-          <View style={styles.upvoteBox}>
-            <MaterialIcons name="thumb-up" size={18} color={colors.primary} />
-            <Text style={styles.upvoteCount}>{rant.upvotes}</Text>
-          </View>
-        </View>
-        {/* Rant Text */}
-        <Text style={styles.rantText}>{rant.text}</Text>
-        {/* Divider */}
-        <View style={styles.divider} />
-        {/* Comments */}
-        <Text style={styles.commentsTitle}>Comments</Text>
-        <FlatList
-          data={COMMENTS}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <View style={styles.commentRow}>
-              <Image source={{uri: item.user.avatarUrl}} style={styles.commentAvatar} />
-              <View style={styles.commentContent}>
-                <Text style={styles.commentUser}>{item.user.name}</Text>
-                <Text style={styles.commentText}>{item.text}</Text>
-                <Text style={styles.commentTime}>{item.timeAgo}</Text>
-              </View>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={28} color={colors.textPrimary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">{rant.title || 'Rant Details'}</Text>
+        <View style={{width: 28}} />
+      </View>
+      <FlatList
+        data={COMMENTS}
+        keyExtractor={item => item.id}
+        ListHeaderComponent={renderRantDetails}
+        renderItem={({item}) => (
+          <View style={styles.commentRow}>
+            <Image source={{uri: item.user.avatarUrl}} style={styles.commentAvatar} />
+            <View style={styles.commentContent}>
+              <Text style={styles.commentUser}>{item.user.name}</Text>
+              <Text style={styles.commentText}>{item.text}</Text>
+              <Text style={styles.commentTime}>{item.timeAgo}</Text>
             </View>
-          )}
-          contentContainerStyle={{paddingBottom: 80}}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+          </View>
+        )}
+        contentContainerStyle={{paddingBottom: 80}}
+        showsVerticalScrollIndicator={false}
+      />
       {/* Comment Input */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -106,6 +122,7 @@ const RantDetailScreen = ({ route, navigation }: RantDetailScreenProps) => {
       >
         <View style={styles.inputBar}>
           <TextInput
+            ref={commentInputRef}
             style={styles.input}
             placeholder="Add a comment..."
             placeholderTextColor={colors.textSecondary}
@@ -124,27 +141,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  headerGradient: {
-    paddingTop: 54,
-    paddingBottom: 18,
-    paddingHorizontal: 18,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  headerRow: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 54 : StatusBar.currentHeight || 32,
+    paddingBottom: 12,
+    paddingHorizontal: 18,
+    backgroundColor: colors.background,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 2,
+    elevation: 1,
   },
   headerTitle: {
-    ...typography.h2,
-    color: colors.background,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '600' as '600',
+    color: colors.textPrimary,
+    letterSpacing: 0.1,
   },
   scrollContent: {
     padding: spacing.lg,

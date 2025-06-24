@@ -148,6 +148,10 @@ const HomeScreen = () => {
     );
   };
 
+  const handleCommentPress = (rant: any) => {
+    navigation.navigate('RantDetail', { rant: rant });
+  };
+
   const sortedRants = [...rants].sort((a, b) => {
     if (sortBy === 'recent') {
       return 0;
@@ -244,6 +248,7 @@ const HomeScreen = () => {
               timeAgo={item.timeAgo}
               imageUrl={item.imageUrl}
               onUpvote={() => handleUpvote(item.id)}
+              onCommentPress={() => handleCommentPress(item)}
             />
           </TouchableOpacity>
         )}

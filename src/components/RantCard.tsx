@@ -6,10 +6,15 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  Share,
+  Alert,
+  Dimensions,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {RantCardProps} from '../types/index';
 import theme, {colors, spacing, typography} from '../utils/theme';
+
+const {width: screenWidth} = Dimensions.get('window');
 
 const RantCard = ({
   id,
@@ -22,8 +27,10 @@ const RantCard = ({
   timeAgo,
   imageUrl,
   onUpvote,
+  onCommentPress,
 }: RantCardProps) => {
   const [isUpvoted, setIsUpvoted] = useState(false);
+  const [showReportPopup, setShowReportPopup] = useState(false);
   const scaleAnim = useState(new Animated.Value(1))[0];
 
   const handleUpvote = () => {
@@ -45,8 +52,68 @@ const RantCard = ({
     }
   };
 
+  const handleCommentPress = () => {
+    if (onCommentPress) {
+      onCommentPress();
+    }
+  };
+
+  const handleSharePress = async () => {
+    try {
+      const shareContent = {
+        title: title || 'Check out this rant',
+        message: `${title}\n\n${text}\n\nShared via Citizen`,
+        url: `citizen://rant/${id}`, // Deep link to the rant
+      };
+      
+      await Share.share(shareContent, {
+        dialogTitle: 'Share this rant',
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handleMorePress = () => {
+    setShowReportPopup(!showReportPopup);
+  };
+
+  const handleReportPress = () => {
+    setShowReportPopup(false);
+    Alert.alert(
+      'Report Rant',
+      'Are you sure you want to report this rant?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Report',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Reported', 'Thank you for your report. We will review it shortly.');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleOutsidePress = () => {
+    setShowReportPopup(false);
+  };
+
   return (
     <View style={styles.cardContainer}>
+      {/* Report Popup Overlay */}
+      {showReportPopup && (
+        <TouchableOpacity 
+          style={styles.popupOverlay} 
+          activeOpacity={1} 
+          onPress={handleOutsidePress}
+        />
+      )}
+
       {/* Card Header */}
       <View style={styles.cardHeader}>
         <Image source={{uri: user.avatarUrl}} style={styles.avatar} />
@@ -54,9 +121,25 @@ const RantCard = ({
           <Text style={styles.userName}>{user.name}</Text>
           <Text style={styles.cityText}>{city}</Text>
         </View>
-        <TouchableOpacity>
-          <MaterialIcons name="more-horiz" size={24} color={colors.textSecondary} />
-        </TouchableOpacity>
+        <View style={styles.moreButtonContainer}>
+          <TouchableOpacity onPress={handleMorePress} style={styles.moreButton}>
+            <MaterialIcons name="more-horiz" size={24} color={colors.textSecondary} />
+          </TouchableOpacity>
+          
+          {/* Report Popup */}
+          {showReportPopup && (
+            <View style={styles.reportPopup}>
+              <TouchableOpacity 
+                style={styles.reportOption} 
+                onPress={handleReportPress}
+                activeOpacity={0.7}
+              >
+                <MaterialIcons name="report" size={16} color={colors.error} />
+                <Text style={styles.reportText}>Report</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Image */}
@@ -75,14 +158,14 @@ const RantCard = ({
             />
           </TouchableOpacity>
         </Animated.View>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity onPress={handleCommentPress} style={styles.actionButton}>
           <MaterialIcons
             name="chat-bubble-outline"
             size={24}
             color={colors.textSecondary}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.lastActionButton]}>
+        <TouchableOpacity onPress={handleSharePress} style={[styles.actionButton, styles.lastActionButton]}>
           <MaterialIcons name="share" size={24} color={colors.textSecondary} />
         </TouchableOpacity>
       </View>
@@ -96,7 +179,7 @@ const RantCard = ({
           {'  '}
           {text}
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleCommentPress}>
           <Text style={styles.commentText}>
             See all {commentCount} comments
           </Text>
@@ -117,6 +200,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  popupOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'transparent',
+    zIndex: 1,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -142,6 +234,39 @@ const styles = StyleSheet.create({
   cityText: {
     ...typography.caption,
     color: colors.textSecondary,
+  },
+  moreButtonContainer: {
+    position: 'relative',
+  },
+  moreButton: {
+    padding: spacing.xs,
+  },
+  reportPopup: {
+    position: 'absolute',
+    top: 40,
+    right: 0,
+    backgroundColor: colors.card,
+    borderRadius: spacing.sm,
+    padding: spacing.xs,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    zIndex: 10,
+    minWidth: 100,
+  },
+  reportOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+  },
+  reportText: {
+    ...typography.caption,
+    color: colors.error,
+    fontWeight: '600',
+    marginLeft: spacing.xs,
   },
   rantImage: {
     width: '100%',
