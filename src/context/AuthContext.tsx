@@ -27,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // On app start, load token from storage
     const loadToken = async () => {
       const storedToken = await AsyncStorage.getItem('userToken');
+      console.log("user is logged in")
       if (storedToken) setToken(storedToken);
     };
     loadToken();
