@@ -38,7 +38,7 @@ const LoginScreen = () => {
     }
     setIsLoading(true);
     try {
-      const response = await api.post('/api/auth/login', {email, password});
+      const response = await api.post('/api/users/login', {email, password});
       const {token, user} = response.data;
 
       await AsyncStorage.setItem('userToken', token);

@@ -91,32 +91,55 @@ const HomeScreen = () => {
     }
     return true;
   };
+
+  const fetchCity = async (lat: number, lon: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'citizen-app/1.0 (your-email@example.com)',
+          },
+        }
+      );
+      return await response.json();
+    } catch (e) {
+      console.warn('Retrying location fetch...');
+      await new Promise(r => setTimeout(r, 1000)); // 1s delay
+      const retry = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+        {
+          headers: {
+            'User-Agent': 'citizen-app/1.0 (adi.sh5442@gmail.com)',
+          },
+        }
+      );
+      return await retry.json();
+    }
+  };
+
   const getCurrentLocation = () => {
+    setLocationError(null);
+    setCurrentLocation('Loading...');
     Geolocation.getCurrentPosition(
       async position => {
         const {latitude, longitude} = position.coords;
-        console.log('latitude', latitude);
-        console.log('longitude', longitude);
         try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-          );
-          const data = await response.json();
+          const data = await fetchCity(latitude, longitude);
           const city =
             data.address.city ||
             data.address.town ||
             data.address.village ||
             'Unknown Location';
           setCurrentLocation(city);
-          setLocationError(null);
         } catch (error) {
           console.error('Error fetching location name:', error);
-          setLocationError('Error getting location name');
+          setLocationError('Failed to fetch city');
         }
       },
       error => {
         console.error('Error getting location:', error);
-        setLocationError('Error getting location');
+        setLocationError('Failed to get location');
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
@@ -168,7 +191,9 @@ const HomeScreen = () => {
       <View style={styles.headerRow}>
         {/* Logo */}
         <View style={styles.logoLeft}>
-          <Text style={styles.logoText}>CITIZEN</Text>
+          <Text style={styles.logoText} numberOfLines={1}>
+            CITIZEN
+          </Text>
         </View>
         {/* Badge system (center) */}
         <View style={styles.badgeCenter}>
@@ -183,7 +208,7 @@ const HomeScreen = () => {
         <TouchableOpacity style={styles.locationPill} onPress={getCurrentLocation}>
           <Text style={styles.locationIcon}>📍</Text>
           <Text style={styles.locationPillText} numberOfLines={1}>
-            {locationError || currentLocation}
+            {locationError ? 'Try Again' : currentLocation}
           </Text>
         </TouchableOpacity>
       </View>
@@ -282,12 +307,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   logoLeft: {
-    flex: 1,
+    flexShrink: 1,
     alignItems: 'flex-start',
   },
   badgeCenter: {
-    flex: 1,
+    flexShrink: 0,
     alignItems: 'center',
+    marginHorizontal: 8,
   },
   logoText: {
     fontSize: 26,
@@ -304,9 +330,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderRadius: 20,
-    paddingHorizontal: 14,
+    paddingHorizontal: 5,
     paddingVertical: 6,
-    maxWidth: 140,
+    maxWidth: 100,
+    flexShrink: 1,
   },
   locationIcon: {
     fontSize: 15,
@@ -316,7 +343,6 @@ const styles = StyleSheet.create({
     ...theme.typography.caption,
     color: theme.colors.background,
     fontWeight: '600',
-    flex: 1,
   },
   floatingSortTabsWrapper: {
     alignItems: 'center',
