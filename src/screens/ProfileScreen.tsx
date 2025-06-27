@@ -15,11 +15,13 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, typography} from '../utils/theme';
 import {useNavigation} from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
 
 const {width: screenWidth} = Dimensions.get('window');
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+  const { user } = useAuth();
   const [profileImage, _setProfileImage] = useState(null);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [userStats] = useState({
@@ -112,8 +114,8 @@ const ProfileScreen = () => {
           </View>
         </TouchableOpacity>
 
-        <Text style={styles.username}>John Doe</Text>
-        <Text style={styles.bio}>Local community advocate | City enthusiast</Text>
+        <Text style={styles.username}>{user?.username || 'User'}</Text>
+        <Text style={styles.bio}>{user?.email || 'No email'}</Text>
 
         {/* Stats */}
         <View style={styles.statsContainer}>
