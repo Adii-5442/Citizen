@@ -17,7 +17,7 @@ import {colors, typography} from '../utils/theme';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigators/AppNavigator';
 import api from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,6 +26,7 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -40,10 +41,7 @@ const LoginScreen = () => {
     try {
       const response = await api.post('/api/users/login', {email, password});
       const {token, user} = response.data;
-
-      await AsyncStorage.setItem('userToken', token);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
-
+      await login(token, user);
       navigation.replace('MainTabs');
     } catch (error: any) {
       const errorMessage =

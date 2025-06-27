@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: colors.card,
     borderRadius: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.05,

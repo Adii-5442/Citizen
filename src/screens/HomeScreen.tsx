@@ -379,8 +379,8 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
   rantsContainer: {
-    padding: theme.spacing.lg,
-    paddingBottom: 120,
+    padding: theme.spacing.md,
+    paddingBottom: 50,
   },
   fabContainer: {
     position: 'absolute',
