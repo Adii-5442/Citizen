@@ -6,11 +6,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigators/AppNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
+import { useAuth } from '../context/AuthContext';
 
 type SplashScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
 const SplashScreen = () => {
   const navigation = useNavigation<SplashScreenNavigationProp>();
+  const { token, isLoading } = useAuth();
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
   const scaleAnim = useMemo(() => new Animated.Value(0.8), []);
 
@@ -29,36 +31,43 @@ const SplashScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
+  }, [fadeAnim, scaleAnim]);
 
-    const checkAuth = async () => {
-      try {
-        // In a real app, you'd verify a token with your backend
-        const userToken = await AsyncStorage.getItem('userToken');
+  useEffect(() => {
+    // Wait for auth state to be determined
+    if (!isLoading) {
+      const navigateToAppropriateScreen = async () => {
+        try {
+          // Check if onboarding has been completed
+          const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
 
-        // Check if onboarding has been completed
-        const hasOnboarded = await AsyncStorage.getItem('hasOnboarded');
-
-        setTimeout(() => {
-          if (userToken) {
-            navigation.replace('MainTabs');
-          } else {
-            if (hasOnboarded) {
-              console.log('Login');
-              navigation.replace('Login');
+          // Add a small delay to show the splash screen
+          setTimeout(() => {
+            if (token) {
+              // User is authenticated
+              console.log('User authenticated, navigating to MainTabs');
+              navigation.replace('MainTabs');
             } else {
-              console.log('Onboarding');
-              navigation.replace('Onboarding');
+              // User is not authenticated
+              if (hasOnboarded) {
+                console.log('User not authenticated, navigating to Login');
+                navigation.replace('Login');
+              } else {
+                console.log('First time user, navigating to Onboarding');
+                navigation.replace('Onboarding');
+              }
             }
-          }
-        }, 2500);
-      } catch (e) {
-        console.error('Failed to check auth state:', e);
-        navigation.replace('Login');
-      }
-    };
+          }, 1500); // Reduced delay since we're already waiting for auth state
+        } catch (error) {
+          console.error('Error checking onboarding status:', error);
+          // Fallback to login screen
+          navigation.replace('Login');
+        }
+      };
 
-    checkAuth();
-  }, [navigation, fadeAnim, scaleAnim]);
+      navigateToAppropriateScreen();
+    }
+  }, [isLoading, token, navigation]);
 
   return (
     <LinearGradient colors={colors.gradient} style={styles.container}>

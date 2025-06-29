@@ -17,7 +17,7 @@ import {colors, typography} from '../utils/theme';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigators/AppNavigator';
 import api from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -26,6 +26,7 @@ type RegisterScreenNavigationProp = NativeStackNavigationProp<
 
 const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -170,7 +171,8 @@ const RegisterScreen = () => {
       return;
     }
     // Only proceed if username is available
-    if (!usernameAvailable) {      Alert.alert('Error', usernameError || 'Username is not available.');
+    if (!usernameAvailable) {
+      Alert.alert('Error', usernameError || 'Username is not available.');
       return;
     }
     setIsLoading(true);
@@ -183,8 +185,8 @@ const RegisterScreen = () => {
       });
       const {token, user} = response.data;
 
-      await AsyncStorage.setItem('userToken', token);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      // Use AuthContext login function instead of manually setting AsyncStorage
+      await login(token, user);
 
       navigation.replace('MainTabs');
     } catch (error: any) {
