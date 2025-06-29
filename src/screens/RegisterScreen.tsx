@@ -17,8 +17,7 @@ import {colors, typography} from '../utils/theme';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigators/AppNavigator';
 import api from '../services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_URL} from '@env';
+import { useAuth } from '../context/AuthContext';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,29 +26,167 @@ type RegisterScreenNavigationProp = NativeStackNavigationProp<
 
 const RegisterScreen = () => {
   const navigation = useNavigation<RegisterScreenNavigationProp>();
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  console.log(API_URL)
+
+  // Username availability states
+  const [usernameAvailable, setUsernameAvailable] = useState(false);
+  const [usernameChecked, setUsernameChecked] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+
+  // Validation states
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // Validation functions
+  const validateUsername = (text: string) => {
+    if (!text.trim()) {
+      return 'Username is required';
+    }
+    if (text.length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (text.length > 20) {
+      return 'Username must be less than 20 characters';
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(text)) {
+      return 'Username can only contain letters, numbers, and underscores';
+    }
+    return '';
+  };
+
+  const validateEmail = (text: string) => {
+    if (!text.trim()) {
+      return 'Email is required';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(text)) {
+      return 'Please enter a valid email address';
+    }
+    return '';
+  };
+
+  const validatePassword = (text: string) => {
+    if (!text) {
+      return 'Password is required';
+    }
+    if (text.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    if (text.length > 50) {
+      return 'Password must be less than 50 characters';
+    }
+    return '';
+  };
+
+  // Reset check if username changes
+  const handleUsernameChange = (text: string) => {
+    setUsername(text);
+    setUsernameChecked(false);
+    setUsernameAvailable(false);
+    setUsernameError('');
+    const validationError = validateUsername(text);
+    if (validationError) {
+      setUsernameError(validationError);
+    }
+  };
+
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    const validationError = validateEmail(text);
+    setEmailError(validationError);
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    const validationError = validatePassword(text);
+    setPasswordError(validationError);
+  };
+
+  const handleUsernameBlur = async () => {
+    const validationError = validateUsername(username);
+    if (validationError) {
+      setUsernameError(validationError);
+      setUsernameAvailable(false);
+      setUsernameChecked(false);
+      return;
+    }
+    if (!username.trim()) {
+      setUsernameError('Enter a username');
+      setUsernameAvailable(false);
+      setUsernameChecked(false);
+      return;
+    }
+    setCheckingUsername(true);
+    setUsernameError('');
+    try {
+      const res = await api.get(`/api/users/check-username?username=${encodeURIComponent(username.trim())}`);
+      if (res.data.available) {
+        setUsernameAvailable(true);
+        setUsernameChecked(true);
+        setUsernameError('');
+      } else {
+        setUsernameAvailable(false);
+        setUsernameChecked(true);
+        setUsernameError('Username is already taken');
+      }
+    } catch (e) {
+      setUsernameAvailable(false);
+      setUsernameChecked(false);
+      setUsernameError('Could not check username');
+      console.error(e)
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
 
   const handleRegister = async () => {
+    // Validate all fields
+    const usernameValidation = validateUsername(username);
+    const emailValidation = validateEmail(email);
+    const passwordValidation = validatePassword(password);
+
+    if (usernameValidation) {
+      setUsernameError(usernameValidation);
+    }
+    if (emailValidation) {
+      setEmailError(emailValidation);
+    }
+    if (passwordValidation) {
+      setPasswordError(passwordValidation);
+    }
+
+    if (usernameValidation || emailValidation || passwordValidation) {
+      Alert.alert('Error', 'Please fix the validation errors.');
+      return;
+    }
+
     if (!username || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
+    // Only proceed if username is available
+    if (!usernameAvailable) {
+      Alert.alert('Error', usernameError || 'Username is not available.');
+      return;
+    }
     setIsLoading(true);
     try {
-      const response = await api.post('/api/auth/register', {
+      console.log("registering user")
+      const response = await api.post('/api/users/register', {
         username,
         email,
         password,
       });
       const {token, user} = response.data;
 
-      await AsyncStorage.setItem('userToken', token);
-      await AsyncStorage.setItem('user', JSON.stringify(user));
+      // Use AuthContext login function instead of manually setting AsyncStorage
+      await login(token, user);
 
       navigation.replace('MainTabs');
     } catch (error: any) {
@@ -75,7 +212,7 @@ const RegisterScreen = () => {
       </View>
 
       <View style={styles.form}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, usernameChecked && (usernameAvailable ? styles.inputAvailable : styles.inputUnavailable)]}>
           <MaterialIcons
             name="person"
             size={20}
@@ -87,10 +224,24 @@ const RegisterScreen = () => {
             placeholder="Username"
             placeholderTextColor={colors.textLight}
             value={username}
-            onChangeText={setUsername}
+            onChangeText={handleUsernameChange}
             autoCapitalize="none"
+            editable={!checkingUsername && !isLoading}
+            onBlur={handleUsernameBlur}
           />
+          {checkingUsername ? (
+            <ActivityIndicator size="small" color={colors.primary} />
+          ) : usernameChecked ? (
+            <MaterialIcons
+              name={usernameAvailable ? 'check-circle' : 'cancel'}
+              size={22}
+              color={usernameAvailable ? colors.success : colors.error}
+            />
+          ) : null}
         </View>
+        {usernameError ? (
+          <Text style={styles.errorText}>{usernameError}</Text>
+        ) : null}
 
         <View style={styles.inputContainer}>
           <MaterialIcons
@@ -104,11 +255,14 @@ const RegisterScreen = () => {
             placeholder="Email Address"
             placeholderTextColor={colors.textLight}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={handleEmailChange}
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
+        {emailError ? (
+          <Text style={styles.errorText}>{emailError}</Text>
+        ) : null}
 
         <View style={styles.inputContainer}>
           <MaterialIcons
@@ -122,7 +276,7 @@ const RegisterScreen = () => {
             placeholder="Password"
             placeholderTextColor={colors.textLight}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={handlePasswordChange}
             secureTextEntry={!isPasswordVisible}
           />
           <TouchableOpacity
@@ -135,11 +289,14 @@ const RegisterScreen = () => {
             />
           </TouchableOpacity>
         </View>
+        {passwordError ? (
+          <Text style={styles.errorText}>{passwordError}</Text>
+        ) : null}
 
         <TouchableOpacity
-          style={[styles.registerButton, isLoading && styles.loadingButton]}
+          style={[styles.registerButton, (isLoading || !usernameAvailable) && styles.loadingButton]}
           onPress={handleRegister}
-          disabled={isLoading}>
+          disabled={isLoading || !usernameAvailable}>
           {isLoading ? (
             <ActivityIndicator color={colors.background} />
           ) : (
@@ -174,6 +331,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.text,
     marginBottom: 8,
+    fontWeight: '700',
   },
   subtitle: {
     ...typography.body,
@@ -220,7 +378,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   loadingButton: {
-    backgroundColor: colors.primary + '80',
+    backgroundColor: colors.primary,
   },
   registerButtonText: {
     ...typography.h2,
@@ -242,6 +400,24 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.primary,
     fontWeight: 'bold',
+  },
+  inputAvailable: {
+    borderColor: colors.success,
+  },
+  inputUnavailable: {
+    borderColor: colors.error,
+  },
+  usernameError: {
+    color: colors.error,
+    marginLeft: 16,
+    marginBottom: 8,
+    fontSize: 13,
+  },
+  errorText: {
+    color: colors.error,
+    marginLeft: 16,
+    marginBottom: 8,
+    fontSize: 13,
   },
 });
 

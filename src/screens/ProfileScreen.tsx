@@ -8,20 +8,16 @@ import {
   ScrollView,
   Platform,
   ImageStyle,
-  TextStyle,
   Alert,
-  Dimensions,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {colors, typography} from '../utils/theme';
 import {useNavigation} from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 
-const {width: screenWidth} = Dimensions.get('window');
-
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { user,logout } = useAuth();
   const [profileImage, _setProfileImage] = useState(null);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [userStats] = useState({
@@ -39,7 +35,7 @@ const ProfileScreen = () => {
     setShowLogoutPopup(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async() => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -51,14 +47,15 @@ const ProfileScreen = () => {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             // TODO: Clear cache and logout logic
             console.log('Logging out...');
             // Clear user data, tokens, etc.
             // Navigate to login screen
+            await logout();
             navigation.reset({
               index: 0,
-              routes: [{name: 'Login'}],
+              routes: [{name: 'Login'} as any],
             });
           },
         },
@@ -214,6 +211,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.h1,
     fontSize: 24,
+    fontWeight: '700',
   },
   settingsButton: {
     padding: 8,
@@ -257,6 +255,7 @@ const styles = StyleSheet.create({
   username: {
     ...typography.h2,
     marginBottom: 8,
+    fontWeight: '700',
   },
   bio: {
     ...typography.body,
@@ -280,6 +279,7 @@ const styles = StyleSheet.create({
   statNumber: {
     ...typography.h2,
     color: colors.primary,
+    fontWeight: '700',
   },
   statLabel: {
     ...typography.caption,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   editProfileText: {
     ...typography.body,
     color: colors.background,
-    fontWeight: '600' as const,
+    fontWeight: '600',
   },
   activitySection: {
     padding: 16,
@@ -363,6 +363,7 @@ const styles = StyleSheet.create({
   achievementTitle: {
     ...typography.h2,
     marginBottom: 4,
+    fontWeight: '700',
   },
   achievementDescription: {
     ...typography.caption,
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.error,
     marginLeft: 12,
-    fontWeight: '500' as '500',
+    fontWeight: '500',
   },
 });
 

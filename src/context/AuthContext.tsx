@@ -12,6 +12,7 @@ export type User = {
 type AuthContextType = {
   token: string | null;
   user: User | null;
+  isLoading: boolean;
   login: (token: string, user: User) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: User) => void;
@@ -22,30 +23,59 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // On app start, load token from storage
     const loadToken = async () => {
-      const storedToken = await AsyncStorage.getItem('userToken');
-      if (storedToken) setToken(storedToken);
+      try {
+        setIsLoading(true);
+        const storedToken = await AsyncStorage.getItem('userToken');
+        const userData = await AsyncStorage.getItem('userData');
+        
+        if (storedToken && userData) {
+          setToken(storedToken);
+          setUser(JSON.parse(userData));
+          console.log("User is logged in", storedToken, userData);
+        } else {
+          console.log("User is not logged in");
+        }
+      } catch (error) {
+        console.error('Error loading auth state:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
+    
     loadToken();
   }, []);
 
   const login = async (newToken: string, userData: User) => {
-    setToken(newToken);
-    setUser(userData);
-    await AsyncStorage.setItem('userToken', newToken);
+    try {
+      setToken(newToken);
+      setUser(userData);
+      await AsyncStorage.setItem('userToken', newToken);
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error during login:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    setToken(null);
-    setUser(null);
-    await AsyncStorage.removeItem('userToken');
+    try {
+      setToken(null);
+      setUser(null);
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, setUser }}>
+    <AuthContext.Provider value={{ token, user, isLoading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
